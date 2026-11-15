@@ -146,11 +146,9 @@
                 </table>
             </div>
         </div>
-        @if($tariffs->hasPages())
-            <div class="card-footer bg-white border-top py-3">
-                {{ $tariffs->links() }}
-            </div>
-        @endif
+        <div class="card-footer bg-white border-top py-3">
+            <x-table-footer :paginator="$tariffs" label="tarif layanan" />
+        </div>
     </div>
 </div>
 
