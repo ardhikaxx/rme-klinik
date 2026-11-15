@@ -192,11 +192,9 @@
                 </table>
             </div>
         </div>
-        @if($medicines->hasPages())
-            <div class="card-footer bg-white border-top py-3">
-                {{ $medicines->withQueryString()->links() }}
-            </div>
-        @endif
+        <div class="card-footer bg-white border-top py-3">
+            <x-table-footer :paginator="$medicines" label="master obat" />
+        </div>
     </div>
 </div>
 
