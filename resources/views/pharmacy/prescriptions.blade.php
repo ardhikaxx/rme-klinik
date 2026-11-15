@@ -1,18 +1,20 @@
 @extends('layouts.app')
 
 @section('title', 'Daftar Resep Farmasi (E-Prescription)')
+@section('page_title', 'Instalasi Farmasi & Apotek')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item active" aria-current="page">E-Resep Farmasi</li>
+@endsection
+
+@section('page_actions')
+    <div class="text-muted small">
+        <i class="fas fa-pills me-1 text-warning"></i> Status Stok & Resep Real-Time
+    </div>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Instalasi Farmasi & Apotek</h4>
-            <p class="text-muted small mb-0">Pengelolaan resep elektronik, telaah farmasi, dan dispensing obat berbasis FEFO</p>
-        </div>
-        <div class="text-muted small">
-            <i class="fas fa-pills me-1 text-warning"></i> Status Stok & Resep Real-Time
-        </div>
-    </div>
+<div class="container-fluid p-0">
 
     <!-- Filter Status Tabs -->
     <div class="card border-0 shadow-sm mb-4">
