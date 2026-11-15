@@ -19,8 +19,8 @@
     <div class="card-body">
         <form method="GET" action="{{ route('visits.index') }}" class="row g-2 align-items-center">
             <div class="col-12 col-md-3">
-                <label class="form-label small text-muted mb-1">Tanggal Pelayanan</label>
-                <input type="date" name="date" value="{{ $filters['date'] ?? date('Y-m-d') }}" class="form-control form-control-sm">
+                <label class="form-label small text-muted mb-1">Tanggal Pelayanan (Opsional)</label>
+                <input type="date" name="date" value="{{ $filters['date'] ?? '' }}" class="form-control form-control-sm">
             </div>
             <div class="col-6 col-md-2">
                 <label class="form-label small text-muted mb-1">Poliklinik</label>
@@ -101,7 +101,7 @@
                                 </a>
                                 <small class="text-muted d-block">{{ ucfirst($v->visit_type) }}</small>
                             </td>
-                            <td class="text-nowrap">{{ $v->registration_date->format('H:i') }} WIB</td>
+                            <td class="text-nowrap">{{ $v->registration_date->format('d/m/Y H:i') }} WIB</td>
                             <td>
                                 <a href="{{ route('patients.show', $v->patient->id) }}" class="fw-semibold text-decoration-none" style="color: var(--rme-info);">
                                     {{ $v->patient->name }}
@@ -128,7 +128,7 @@
                         <tr>
                             <td colspan="9" class="text-center py-5 text-muted">
                                 <i class="fa-solid fa-calendar-xmark fa-3x text-muted mb-3 d-block"></i>
-                                Tidak ada kunjungan pasien yang sesuai kriteria pencarian pada tanggal ini.
+                                Tidak ada kunjungan pasien yang sesuai kriteria pencarian.
                             </td>
                         </tr>
                     @endforelse
