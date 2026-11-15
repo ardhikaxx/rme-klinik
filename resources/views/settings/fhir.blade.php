@@ -102,7 +102,7 @@
                                         {{ $map->status === 'synced' ? 'Tervalidasi R4' : 'Staged' }}
                                     </span>
                                 </td>
-                                <td>{{ $map->updated_at->format('d/m/Y H:i') }}</td>
+                                <td class="text-nowrap">{{ $map->updated_at->format('d/m/Y H:i') }}</td>
                                 <td class="text-center">
                                     <button type="button" class="btn btn-sm btn-outline-primary btn-preview-fhir" 
                                             data-res="{{ $map->resource_type }}" 
@@ -123,11 +123,9 @@
                 </table>
             </div>
         </div>
-        @if($mappings->hasPages())
-            <div class="card-footer bg-white border-top py-3">
-                {{ $mappings->links() }}
-            </div>
-        @endif
+        <div class="card-footer bg-white border-top py-3">
+            <x-table-footer :paginator="$mappings" label="pemetaan FHIR" />
+        </div>
     </div>
 </div>
 
