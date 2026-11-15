@@ -152,13 +152,23 @@ class ReportService
     }
 
     /**
+     * Query behind the medical fee report.
+     *
+     * Kept as a builder so the on-screen table can paginate at database
+     * level while the CSV export still streams the whole period.
+     */
+    public function medicalFeesQuery(string $startDate, string $endDate)
+    {
+        return MedicalFeeTransaction::with(['doctor', 'nurse', 'visit.patient'])
+            ->whereBetween('created_at', [Carbon::parse($startDate)->startOfDay(), Carbon::parse($endDate)->endOfDay()])
+            ->orderBy('created_at', 'desc');
+    }
+
+    /**
      * Medical Fee report per doctor.
      */
     public function getMedicalFees(string $startDate, string $endDate)
     {
-        return MedicalFeeTransaction::with(['doctor', 'nurse', 'visit.patient'])
-            ->whereBetween('created_at', [Carbon::parse($startDate)->startOfDay(), Carbon::parse($endDate)->endOfDay()])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        return $this->medicalFeesQuery($startDate, $endDate)->get();
     }
 }
