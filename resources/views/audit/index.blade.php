@@ -1,18 +1,20 @@
 @extends('layouts.app')
 
 @section('title', 'Jejak Audit Keamanan & Klinis (Audit Trail)')
+@section('page_title', 'Jejak Audit Keamanan & Klinis (Audit Trail)')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item active" aria-current="page">Audit Trail</li>
+@endsection
+
+@section('page_actions')
+    <span class="badge bg-secondary fs-6 px-3 py-2">
+        <i class="fas fa-lock me-1"></i> Append-Only Immutable Log
+    </span>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Jejak Audit Keamanan & Transaksi Klinis (Audit Trail)</h4>
-            <p class="text-muted small mb-0">Pencatatan riwayat setiap aksi autentikasi, perubahan rekam medis, transaksi farmasi, dan pembayaran</p>
-        </div>
-        <span class="badge bg-secondary fs-6 px-3 py-2">
-            <i class="fas fa-lock me-1"></i> Append-Only Immutable Log
-        </span>
-    </div>
+<div class="container-fluid p-0">
 
     <!-- Security Information Alert -->
     <div class="alert alert-dark border-0 shadow-sm d-flex align-items-center mb-4 p-3" role="alert">
