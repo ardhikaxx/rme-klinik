@@ -18,9 +18,11 @@ class FhirController extends Controller
 {
     public function __construct(protected FhirService $fhirService) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        $mappings = FhirMapping::with('syncLogs')->orderBy('updated_at', 'desc')->paginate(20);
+        $mappings = FhirMapping::with('syncLogs')
+            ->orderBy('updated_at', 'desc')
+            ->paginate($this->perPage($request));
 
         $patientsCount = Patient::count();
         $encountersCount = Visit::count();
