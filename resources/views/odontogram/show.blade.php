@@ -1,9 +1,15 @@
 @extends('layouts.app')
 
 @section('title', 'Peta Odontogram Gigi - ' . $visit->patient->name)
+@section('page_title', 'Peta Odontogram Gigi (FDI System)')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('odontogram.index') }}">Poli Gigi</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Odontogram {{ $visit->visit_number }}</li>
+@endsection
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid p-0">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>
             <div class="d-flex align-items-center gap-2">
