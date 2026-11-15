@@ -84,7 +84,7 @@
                                     <small class="text-muted">{{ $doc->patient?->medical_record_number }} ({{ $doc->patient?->age }} thn)</small>
                                 </td>
                                 <td>{{ $doc->doctor?->formatted_name ?? '-' }}</td>
-                                <td>{{ $doc->created_at->format('d/m/Y H:i') }}</td>
+                                <td class="text-nowrap">{{ $doc->created_at->format('d/m/Y H:i') }}</td>
                                 <td>
                                     <small class="text-muted">
                                         @if($doc->type === 'surat_keterangan_sakit')
@@ -121,11 +121,9 @@
                 </table>
             </div>
         </div>
-        @if($documents->hasPages())
-            <div class="card-footer bg-white border-top py-3">
-                {{ $documents->links() }}
-            </div>
-        @endif
+        <div class="card-footer bg-white border-top py-3">
+            <x-table-footer :paginator="$documents" label="dokumen medis" />
+        </div>
     </div>
 </div>
 @endsection
