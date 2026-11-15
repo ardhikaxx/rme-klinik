@@ -33,7 +33,7 @@ class PharmacyController extends Controller
             $query->where('status', $status);
         }
 
-        $prescriptions = $query->paginate(15);
+        $prescriptions = $query->paginate($this->perPage($request));
 
         return view('pharmacy.prescriptions', compact('prescriptions', 'status'));
     }
@@ -113,7 +113,7 @@ class PharmacyController extends Controller
                     ->orWhere('generic_name', 'like', "%{$search}%")
                     ->orWhere('code', 'like', "%{$search}%");
             })
-            ->paginate(15);
+            ->paginate($this->perPage($request));
 
         $categories = MedicineCategory::all();
         $units = MedicineUnit::all();
@@ -162,13 +162,13 @@ class PharmacyController extends Controller
         return back()->with('success', 'Data obat berhasil diperbarui.');
     }
 
-    public function stockCard(Medicine $medicine): View
+    public function stockCard(Request $request, Medicine $medicine): View
     {
         $medicine->load(['category', 'unit', 'batches']);
         $movements = MedicineStockMovement::with(['batch', 'creator'])
             ->where('medicine_id', $medicine->id)
             ->orderBy('created_at', 'desc')
-            ->paginate(25);
+            ->paginate($this->perPage($request));
 
         return view('pharmacy.stock_card', compact('medicine', 'movements'));
     }
@@ -177,7 +177,7 @@ class PharmacyController extends Controller
     {
         $receipts = MedicineReceipt::with(['supplier', 'receiver', 'items.medicine'])
             ->orderBy('received_date', 'desc')
-            ->paginate(15);
+            ->paginate($this->perPage($request));
 
         $suppliers = Supplier::where('is_active', true)->get();
         $medicines = Medicine::where('is_active', true)->get();
@@ -206,11 +206,11 @@ class PharmacyController extends Controller
             ->with('success', "Penerimaan barang {$receipt->receipt_number} berhasil dicatat dan stok batch telah bertambah.");
     }
 
-    public function opnames(): View
+    public function opnames(Request $request): View
     {
         $opnames = MedicineStockOpname::with(['conductor', 'approver', 'items.medicine', 'items.batch'])
             ->orderBy('opname_date', 'desc')
-            ->paginate(15);
+            ->paginate($this->perPage($request));
 
         $medicines = Medicine::with('batches')->get();
 
