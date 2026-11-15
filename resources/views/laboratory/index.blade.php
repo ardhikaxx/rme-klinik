@@ -72,7 +72,7 @@
                                     <div class="fw-bold text-primary">{{ $req->request_number }}</div>
                                     <span class="badge bg-light text-dark border">Kunjungan: {{ $req->visit?->visit_number }}</span>
                                 </td>
-                                <td>
+                                <td class="text-nowrap">
                                     <div>{{ $req->request_time?->format('d/m/Y') }}</div>
                                     <small class="text-muted">{{ $req->request_time?->format('H:i') }} WIB</small>
                                 </td>
@@ -110,11 +110,9 @@
                 </table>
             </div>
         </div>
-        @if($requests->hasPages())
-            <div class="card-footer bg-white border-top py-3">
-                {{ $requests->links() }}
-            </div>
-        @endif
+        <div class="card-footer bg-white border-top py-3">
+            <x-table-footer :paginator="$requests" label="permintaan pemeriksaan" />
+        </div>
     </div>
 </div>
 @endsection
