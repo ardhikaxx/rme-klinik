@@ -52,13 +52,16 @@
                 @yield('content')
             </main>
 
-            {{-- Footer --}}
-            <footer class="bg-white border-top py-3 px-4 text-center text-md-start d-flex flex-wrap justify-content-between align-items-center text-muted small no-print">
+            {{-- Floating Footer --}}
+            <footer class="floating-footer text-center text-md-start d-flex flex-wrap justify-content-between align-items-center text-muted small no-print">
                 <div>
                     &copy; {{ date('Y') }} <strong>Klinik Pratama Sehat Mandiri</strong> &bull; RME Terpadu Berstandar Permenkes No. 24/2022
                 </div>
-                <div>
-                    Waktu Server: <span class="fw-semibold">{{ \Carbon\Carbon::now()->translatedFormat('d F Y, H:i') }} WIB</span>
+                <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
+                    <span class="badge bg-light text-secondary border">
+                        <i class="fa-solid fa-server me-1 text-success"></i> MySQL Database
+                    </span>
+                    <span>Waktu: <strong class="text-dark">{{ \Carbon\Carbon::now()->translatedFormat('d F Y, H:i') }} WIB</strong></span>
                 </div>
             </footer>
         </div>
