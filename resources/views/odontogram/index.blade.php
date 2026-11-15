@@ -1,19 +1,21 @@
 @extends('layouts.app')
 
-@section('title', 'Daftar Kunjungan Poli Gigi (Odontogram)')
+@section('title', 'Poli Gigi & Mulut (Odontogram)')
+@section('page_title', 'Poli Gigi & Mulut (Odontogram)')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item active" aria-current="page">Poli Gigi & Odontogram</li>
+@endsection
+
+@section('page_actions')
+    <div class="text-muted small">
+        <i class="fas fa-tooth me-1 text-primary"></i> Poliklinik: <strong>{{ $polyGigi?->name ?? 'Poli Gigi' }}</strong> | 
+        <i class="fas fa-calendar-day ms-2 me-1 text-primary"></i> {{ \Carbon\Carbon::today()->translatedFormat('l, d F Y') }}
+    </div>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Poli Gigi & Mulut (Odontogram)</h4>
-            <p class="text-muted small mb-0">Daftar antrean pasien pelayanan kesehatan gigi hari ini</p>
-        </div>
-        <div class="text-muted small">
-            <i class="fas fa-tooth me-1 text-primary"></i> Poliklinik: <strong>{{ $polyGigi?->name ?? 'Poli Gigi' }}</strong> | 
-            <i class="fas fa-calendar-day ms-2 me-1 text-primary"></i> {{ \Carbon\Carbon::today()->translatedFormat('l, d F Y') }}
-        </div>
-    </div>
+<div class="container-fluid p-0">
 
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
