@@ -93,8 +93,8 @@
                                 <td class="text-end text-success fw-bold">
                                     Rp{{ number_format($inv->paid_amount, 0, ',', '.') }}
                                 </td>
-                                <td class="text-end fw-bold {{ $inv->balance_due > 0 ? 'text-danger' : 'text-muted' }}">
-                                    Rp{{ number_format($inv->balance_due, 0, ',', '.') }}
+                                <td class="text-end fw-bold {{ ($inv->balance_amount ?? $inv->balance_due) > 0 ? 'text-danger' : 'text-muted' }}">
+                                    Rp{{ number_format((float) ($inv->balance_amount ?? $inv->balance_due ?? 0), 0, ',', '.') }}
                                 </td>
                                 <td>
                                     <span class="badge {{ $inv->status_badge_class }}">{{ $inv->status_label }}</span>
