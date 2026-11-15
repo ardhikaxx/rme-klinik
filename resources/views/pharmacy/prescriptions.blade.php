@@ -72,7 +72,7 @@
                                     <div class="fw-bold text-primary fs-6">{{ $p->prescription_number }}</div>
                                     <span class="badge bg-light text-dark border">Kunjungan: {{ $p->visit?->visit_number }}</span>
                                 </td>
-                                <td>
+                                <td class="text-nowrap">
                                     <div>{{ $p->created_at->format('d/m/Y') }}</div>
                                     <small class="text-muted">{{ $p->created_at->format('H:i') }} WIB</small>
                                 </td>
@@ -119,11 +119,9 @@
                 </table>
             </div>
         </div>
-        @if($prescriptions->hasPages())
-            <div class="card-footer bg-white border-top py-3">
-                {{ $prescriptions->withQueryString()->links() }}
-            </div>
-        @endif
+        <div class="card-footer bg-white border-top py-3">
+            <x-table-footer :paginator="$prescriptions" label="resep" />
+        </div>
     </div>
 </div>
 @endsection
