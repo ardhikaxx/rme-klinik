@@ -89,7 +89,7 @@
                                 @endif
                             </td>
                             <td>{{ $patient->nik ?? '-' }}</td>
-                            <td>
+                            <td class="text-nowrap">
                                 {{ $patient->date_of_birth ? $patient->date_of_birth->translatedFormat('d M Y') : '-' }}
                                 <small class="text-muted d-block">({{ $patient->age_detail }})</small>
                             </td>
@@ -143,10 +143,8 @@
             </table>
         </div>
     </div>
-    @if($patients->hasPages())
-        <div class="card-footer bg-white border-top py-3">
-            {{ $patients->withQueryString()->links() }}
-        </div>
-    @endif
+    <div class="card-footer bg-white border-top py-3">
+        <x-table-footer :paginator="$patients" label="pasien" />
+    </div>
 </div>
 @endsection
