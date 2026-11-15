@@ -21,7 +21,7 @@
         <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
             <h5 class="card-title mb-0 fw-bold text-primary">
                 <i class="fas fa-user-clock me-2"></i>Antrean Menunggu Pengkajian Awal
-                <span class="badge bg-warning text-dark ms-2">{{ $waitingList->count() }} Pasien</span>
+                <span class="badge bg-warning text-dark ms-2">{{ $waitingList->total() }} Pasien</span>
             </h5>
         </div>
         <div class="card-body p-0">
@@ -89,14 +89,17 @@
                 </table>
             </div>
         </div>
+        <div class="card-footer bg-white border-top py-3">
+            <x-table-footer :paginator="$waitingList" label="pasien antrean" />
+        </div>
     </div>
 
     <!-- Completed Today Card -->
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
             <h5 class="card-title mb-0 fw-bold text-secondary">
-                <i class="fas fa-clipboard-check me-2 text-success"></i>Pengkajian Selesai Hari Ini
-                <span class="badge bg-success ms-2">{{ $completedList->count() }} Selesai</span>
+                <i class="fas fa-clipboard-check me-2 text-success"></i>Daftar Pengkajian Awal Selesai
+                <span class="badge bg-success ms-2">{{ $completedList->total() }} Selesai</span>
             </h5>
         </div>
         <div class="card-body p-0">
@@ -154,6 +157,9 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+        <div class="card-footer bg-white border-top py-3">
+            <x-table-footer :paginator="$completedList" label="pasien selesai" />
         </div>
     </div>
 </div>
