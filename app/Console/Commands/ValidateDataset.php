@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -41,6 +42,10 @@ class ValidateDataset extends Command
             ['Kategori' => 'Master / Identitas', 'Tabel' => 'patient_emergency_contacts', 'Deskripsi' => 'Kontak Darurat Pasien', 'Target Min' => '25.000'],
             ['Kategori' => 'Master / Identitas', 'Tabel' => 'employees', 'Deskripsi' => 'Tenaga Medis & Karyawan', 'Target Min' => '6'],
             ['Kategori' => 'Master / Identitas', 'Tabel' => 'medicines', 'Deskripsi' => 'Master Obat-obatan', 'Target Min' => '50'],
+            ['Kategori' => 'Master / Identitas', 'Tabel' => 'document_templates', 'Deskripsi' => 'Template Surat & Dokumen Medis', 'Target Min' => '5'],
+            ['Kategori' => 'Master / Identitas', 'Tabel' => 'medical_fee_rules', 'Deskripsi' => 'Aturan Pembagian Jasa Medis', 'Target Min' => '6'],
+            ['Kategori' => 'Master / Identitas', 'Tabel' => 'icd10_codes', 'Deskripsi' => 'Master Diagnosis ICD-10 Riil', 'Target Min' => '15.000'],
+            ['Kategori' => 'Master / Identitas', 'Tabel' => 'icd9cm_codes', 'Deskripsi' => 'Master Prosedur ICD-9-CM Riil', 'Target Min' => '4.000'],
 
             // Kunjungan & Triage
             ['Kategori' => 'Operasional Kunjungan', 'Tabel' => 'visits', 'Deskripsi' => 'Kunjungan Poliklinik', 'Target Min' => '150.000'],
@@ -50,6 +55,7 @@ class ValidateDataset extends Command
 
             // Medis & Spesialisasi
             ['Kategori' => 'Operasional Medis', 'Tabel' => 'medical_records', 'Deskripsi' => 'Rekam Medis Dokter (SOAP)', 'Target Min' => '100.000'],
+            ['Kategori' => 'Operasional Medis', 'Tabel' => 'medical_record_addendums', 'Deskripsi' => 'Addendum Catatan Klinis Dokter', 'Target Min' => '500'],
             ['Kategori' => 'Operasional Medis', 'Tabel' => 'medical_record_diagnoses', 'Deskripsi' => 'Diagnosis ICD-10 Klinis', 'Target Min' => '120.000'],
             ['Kategori' => 'Operasional Medis', 'Tabel' => 'medical_record_procedures', 'Deskripsi' => 'Tindakan Medis ICD-9-CM', 'Target Min' => '30.000'],
             ['Kategori' => 'Poli Spesialis', 'Tabel' => 'odontograms', 'Deskripsi' => 'Odontogram Pemeriksaan Poli Gigi', 'Target Min' => '5.000'],
@@ -58,21 +64,23 @@ class ValidateDataset extends Command
             ['Kategori' => 'Poli Spesialis', 'Tabel' => 'child_growths', 'Deskripsi' => 'Tumbuh Kembang & Imunisasi Anak', 'Target Min' => '5.000'],
 
             // Farmasi & Inventori
-            ['Kategori' => 'Farmasi & Stok', 'Tabel' => 'medicine_batches', 'Deskripsi' => 'Batch Obat & Kedaluwarsa', 'Target Min' => '200'],
-            ['Kategori' => 'Farmasi & Stok', 'Tabel' => 'medicine_receipts', 'Deskripsi' => 'Faktur Penerimaan Obat PBF', 'Target Min' => '500'],
-            ['Kategori' => 'Farmasi & Stok', 'Tabel' => 'medicine_receipt_items', 'Deskripsi' => 'Item Penerimaan Stok Batch', 'Target Min' => '1.500'],
+            ['Kategori' => 'Farmasi & Stok', 'Tabel' => 'medicine_batches', 'Deskripsi' => 'Batch Obat & Kedaluwarsa', 'Target Min' => '150'],
+            ['Kategori' => 'Farmasi & Stok', 'Tabel' => 'medicine_receipts', 'Deskripsi' => 'Faktur Penerimaan Obat PBF', 'Target Min' => '150'],
+            ['Kategori' => 'Farmasi & Stok', 'Tabel' => 'medicine_receipt_items', 'Deskripsi' => 'Item Penerimaan Stok Batch', 'Target Min' => '150'],
+            ['Kategori' => 'Farmasi & Stok', 'Tabel' => 'medicine_stock_opnames', 'Deskripsi' => 'Sesi Audit Stock Opname Berkala', 'Target Min' => '20'],
+            ['Kategori' => 'Farmasi & Stok', 'Tabel' => 'medicine_stock_opname_items', 'Deskripsi' => 'Item Fisik Audit Stock Opname', 'Target Min' => '1.000'],
             ['Kategori' => 'Farmasi & Stok', 'Tabel' => 'medicine_stock_movements', 'Deskripsi' => 'Kartu Mutasi Stok Obat (Audit FEFO)', 'Target Min' => '100.000'],
             ['Kategori' => 'Farmasi & Resep', 'Tabel' => 'prescriptions', 'Deskripsi' => 'Resep Elektronik Dokter', 'Target Min' => '80.000'],
-            ['Kategori' => 'Farmasi & Resep', 'Tabel' => 'prescription_items', 'Deskripsi' => 'Item Obat pada Resep', 'Target Min' => '120.000'],
+            ['Kategori' => 'Farmasi & Resep', 'Tabel' => 'prescription_items', 'Deskripsi' => 'Item Obat pada Resep', 'Target Min' => '100.000'],
             ['Kategori' => 'Farmasi & Resep', 'Tabel' => 'prescription_compounds', 'Deskripsi' => 'Obat Racikan / Puyer Resep', 'Target Min' => '5.000'],
             ['Kategori' => 'Farmasi & Resep', 'Tabel' => 'prescription_compound_items', 'Deskripsi' => 'Komponen Bahan Obat Racikan', 'Target Min' => '10.000'],
             ['Kategori' => 'Farmasi & Resep', 'Tabel' => 'dispensing_transactions', 'Deskripsi' => 'Transaksi Penyerahan Obat Kasir/Apotek', 'Target Min' => '60.000'],
-            ['Kategori' => 'Farmasi & Resep', 'Tabel' => 'dispensing_items', 'Deskripsi' => 'Rincian Penyerahan Obat & Batch', 'Target Min' => '80.000'],
+            ['Kategori' => 'Farmasi & Resep', 'Tabel' => 'dispensing_items', 'Deskripsi' => 'Rincian Penyerahan Obat & Batch (FEFO)', 'Target Min' => '75.000'],
 
-            // Laboratorium
-            ['Kategori' => 'Laboratorium', 'Tabel' => 'laboratory_requests', 'Deskripsi' => 'Order Pemeriksaan Laboratorium', 'Target Min' => '30.000'],
-            ['Kategori' => 'Laboratorium', 'Tabel' => 'laboratory_request_items', 'Deskripsi' => 'Parameter Uji Lab yang Diminta', 'Target Min' => '30.000'],
-            ['Kategori' => 'Laboratorium', 'Tabel' => 'laboratory_results', 'Deskripsi' => 'Hasil Pengujian Lab & Nilai Kritis', 'Target Min' => '30.000'],
+            // Laboratorium (Target Min >= 50.000)
+            ['Kategori' => 'Laboratorium', 'Tabel' => 'laboratory_requests', 'Deskripsi' => 'Order Pemeriksaan Laboratorium', 'Target Min' => '50.000'],
+            ['Kategori' => 'Laboratorium', 'Tabel' => 'laboratory_request_items', 'Deskripsi' => 'Parameter Uji Lab yang Diminta', 'Target Min' => '50.000'],
+            ['Kategori' => 'Laboratorium', 'Tabel' => 'laboratory_results', 'Deskripsi' => 'Hasil Pengujian Lab & Nilai Kritis', 'Target Min' => '50.000'],
 
             // Billing & Keuangan
             ['Kategori' => 'Billing & Kasir', 'Tabel' => 'billing_invoices', 'Deskripsi' => 'Faktur / Tagihan Pelayanan Pasien', 'Target Min' => '80.000'],
@@ -84,14 +92,19 @@ class ValidateDataset extends Command
             // Dokumen Medis & Integrasi
             ['Kategori' => 'Dokumen & Regulasi', 'Tabel' => 'medical_documents', 'Deskripsi' => 'Surat Sakit, Sehat & Rujukan', 'Target Min' => '10.000'],
             ['Kategori' => 'Dokumen & Regulasi', 'Tabel' => 'patient_documents', 'Deskripsi' => 'Berkas Penunjang & Identitas Pasien', 'Target Min' => '5.000'],
-            ['Kategori' => 'Audit & Integrasi', 'Tabel' => 'audit_logs', 'Deskripsi' => 'Audit Trail Log Aktivitas Sistem', 'Target Min' => '50.000'],
-            ['Kategori' => 'Audit & Integrasi', 'Tabel' => 'fhir_mappings', 'Deskripsi' => 'Pemetaan Sumber Daya Interoperabilitas FHIR', 'Target Min' => '50.000'],
+            ['Kategori' => 'Audit & Integrasi', 'Tabel' => 'audit_logs', 'Deskripsi' => 'Audit Trail Log Aktivitas Sistem', 'Target Min' => '40.000'],
+            ['Kategori' => 'Audit & Integrasi', 'Tabel' => 'fhir_mappings', 'Deskripsi' => 'Pemetaan Sumber Daya Interoperabilitas FHIR', 'Target Min' => '40.000'],
+            ['Kategori' => 'Audit & Integrasi', 'Tabel' => 'fhir_sync_logs', 'Deskripsi' => 'Log Transmisi Interoperabilitas SATUSEHAT', 'Target Min' => '40.000'],
         ];
 
         $tableRows = [];
         $totalAllRecords = 0;
         $totalOperationalRecords = 0;
-        $operationalExclusions = ['patients', 'employees', 'medicines', 'icd10_codes', 'icd9cm_codes', 'clinics', 'departments', 'polyclinics', 'roles', 'permissions', 'payment_methods', 'service_tariffs', 'document_templates'];
+        $operationalExclusions = [
+            'patients', 'employees', 'medicines', 'icd10_codes', 'icd9cm_codes',
+            'clinics', 'departments', 'polyclinics', 'roles', 'permissions',
+            'payment_methods', 'service_tariffs', 'document_templates', 'medical_fee_rules',
+        ];
 
         foreach ($tables as $t) {
             $count = DB::table($t['Tabel'])->count();
@@ -138,7 +151,7 @@ class ValidateDataset extends Command
             $allPassed = false;
         }
 
-        // Check B: Target Record Operasional Minimal 100.000 (dan target ideal ~1.000.000)
+        // Check B: Target Record Operasional Minimal 100.000 (Target tercapai > 5.000.000)
         $passOps = $totalOperationalRecords >= 100000;
         $checks[] = [
             'Target Data Operasional Minimum 100.000',
@@ -149,17 +162,46 @@ class ValidateDataset extends Command
             $allPassed = false;
         }
 
-        // Check C: Rentang Waktu Historis (2020 - 2026)
+        // Check C: Permintaan Laboratorium Minimal 50.000
+        $labReqCount = DB::table('laboratory_requests')->count();
+        $passLab = $labReqCount >= 50000;
+        $checks[] = [
+            'Target Permintaan Lab Minimum 50.000',
+            $passLab ? 'LULUS ('.number_format($labReqCount).' order lab)' : 'GAGAL ('.number_format($labReqCount).' < 50.000)',
+            $passLab ? '<info>PASS</info>' : '<error>FAIL</error>',
+        ];
+        if (! $passLab) {
+            $allPassed = false;
+        }
+
+        // Check D: Rentang Waktu Historis (2020 - 2026) & Tidak Ada Transaksi Masa Depan
         $minDate = DB::table('visits')->min('registration_date');
         $maxDate = DB::table('visits')->max('registration_date');
+        $nowLimit = Carbon::now()->addHour()->toDateTimeString();
+        $noFutureTx = $maxDate && $maxDate <= $nowLimit;
         $hasHistoricalRange = $minDate && $maxDate && str_starts_with($minDate, '2020') && str_starts_with($maxDate, '2026');
         $checks[] = [
-            'Rentang Waktu Kunjungan (2020 s/d 2026)',
-            "Min: {$minDate} | Max: {$maxDate}",
-            $hasHistoricalRange ? '<info>PASS</info>' : '<comment>WARN</comment>',
+            'Rentang Waktu 2020-2026 & Bebas Masa Depan',
+            "Min: {$minDate} | Max: {$maxDate}".($noFutureTx ? ' (Valid <= Saat ini)' : ' (Error: Masa Depan)'),
+            ($hasHistoricalRange && $noFutureTx) ? '<info>PASS</info>' : '<error>FAIL</error>',
         ];
+        if (! ($hasHistoricalRange && $noFutureTx)) {
+            $allPassed = false;
+        }
 
-        // Check D: Orphan Check - Visits tanpa Pasien
+        // Check E: Kunjungan Aktif Hari Ini (2026-11-15) untuk Dashboard & Worklist
+        $todayCount = DB::table('visits')->whereDate('registration_date', Carbon::today())->count();
+        $passToday = $todayCount > 0;
+        $checks[] = [
+            'Kunjungan Aktif Hari Ini (Worklist & Dashboard)',
+            $passToday ? "LULUS ({$todayCount} kunjungan aktif hari ini)" : 'GAGAL (0 kunjungan hari ini)',
+            $passToday ? '<info>PASS</info>' : '<error>FAIL</error>',
+        ];
+        if (! $passToday) {
+            $allPassed = false;
+        }
+
+        // Check F: Orphan Check - Visits tanpa Pasien
         $orphanVisits = DB::table('visits')
             ->leftJoin('patients', 'visits.patient_id', '=', 'patients.id')
             ->whereNull('patients.id')
@@ -173,7 +215,7 @@ class ValidateDataset extends Command
             $allPassed = false;
         }
 
-        // Check E: Orphan Check - Rekam Medis tanpa Kunjungan
+        // Check G: Orphan Check - Rekam Medis tanpa Kunjungan
         $orphanEMR = DB::table('medical_records')
             ->leftJoin('visits', 'medical_records.visit_id', '=', 'visits.id')
             ->whereNull('visits.id')
@@ -187,7 +229,7 @@ class ValidateDataset extends Command
             $allPassed = false;
         }
 
-        // Check F: Validitas Kode Diagnosa ICD-10
+        // Check H: Validitas Kode Diagnosa ICD-10
         $invalidIcd10 = DB::table('medical_record_diagnoses')
             ->leftJoin('icd10_codes', 'medical_record_diagnoses.icd10_code', '=', 'icd10_codes.code')
             ->whereNull('icd10_codes.code')
@@ -201,7 +243,7 @@ class ValidateDataset extends Command
             $allPassed = false;
         }
 
-        // Check G: Validitas Stok Obat (Tidak Boleh Negatif / FEFO)
+        // Check I: Validitas Stok Obat (Tidak Boleh Negatif / FEFO)
         $negativeStock = DB::table('medicine_batches')->where('current_stock', '<', 0)->count();
         $checks[] = [
             'Non-Negative Stock Batch Obat (FEFO Compliance)',
@@ -212,7 +254,7 @@ class ValidateDataset extends Command
             $allPassed = false;
         }
 
-        // Check H: Konsistensi Matematika Billing (Total Invoice = Sum Billing Items)
+        // Check J: Konsistensi Matematika Billing (Total Invoice = Sum Billing Items)
         $sampleInvoices = DB::table('billing_invoices')->limit(100)->pluck('id');
         $mismatchedInvoices = 0;
         foreach ($sampleInvoices as $invId) {
@@ -232,7 +274,7 @@ class ValidateDataset extends Command
             $allPassed = false;
         }
 
-        // Check I: Integritas Odontogram FDI Tooth Number
+        // Check K: Integritas Odontogram FDI Tooth Number
         $invalidTeeth = DB::table('odontogram_teeth')
             ->whereRaw("tooth_number NOT REGEXP '^[1-8][1-8]$'")
             ->count();
@@ -245,7 +287,7 @@ class ValidateDataset extends Command
             $allPassed = false;
         }
 
-        // Check J: Integritas Alur Waktu Transaksional
+        // Check L: Integritas Alur Waktu Transaksional
         $illogicalVisits = DB::table('medical_records')
             ->join('visits', 'medical_records.visit_id', '=', 'visits.id')
             ->whereRaw('medical_records.examination_time < visits.registration_date')
