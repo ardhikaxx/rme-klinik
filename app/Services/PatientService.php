@@ -14,7 +14,7 @@ class PatientService
     /**
      * Search and paginate patients.
      */
-    public function getPatients(array $filters = [], int $perPage = 15): LengthAwarePaginator
+    public function getPatients(array $filters = [], int $perPage = 50): LengthAwarePaginator
     {
         $query = Patient::query()->with(['allergies', 'emergencyContacts']);
 
