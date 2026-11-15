@@ -32,13 +32,12 @@
 
             {{-- Main Content Container --}}
             <main class="container-fluid py-4 px-3 px-md-4 flex-grow-1">
-                {{-- Breadcrumbs & Page Header --}}
-                <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2">
+                {{-- Breadcrumbs & Page Actions Bar --}}
+                <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
                     <div>
-                        <h4 class="fw-bold mb-1 text-dark">@yield('page_title', 'Halaman')</h4>
                         <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb mb-0 small">
-                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none" style="color: var(--rme-info);">Home</a></li>
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="fa-solid fa-house-chimney me-1"></i>Beranda</a></li>
                                 @yield('breadcrumb')
                             </ol>
                         </nav>
@@ -56,12 +55,6 @@
             <footer class="floating-footer text-center text-md-start d-flex flex-wrap justify-content-between align-items-center text-muted small no-print">
                 <div>
                     &copy; {{ date('Y') }} <strong>Klinik Pratama Sehat Mandiri</strong> &bull; RME Terpadu Berstandar Permenkes No. 24/2022
-                </div>
-                <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
-                    <span class="badge bg-light text-secondary border">
-                        <i class="fa-solid fa-server me-1 text-success"></i> MySQL Database
-                    </span>
-                    <span>Waktu: <strong class="text-dark">{{ \Carbon\Carbon::now()->translatedFormat('d F Y, H:i') }} WIB</strong></span>
                 </div>
             </footer>
         </div>
