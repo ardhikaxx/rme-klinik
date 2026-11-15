@@ -78,7 +78,7 @@
                             @endphp
                             <tr>
                                 <td class="fw-bold"><span class="badge bg-light text-dark border">{{ $batch->batch_number }}</span></td>
-                                <td>
+                                <td class="text-nowrap">
                                     {{ $batch->expiry_date->format('d F Y') }}
                                     @if($isExpired)
                                         <span class="badge bg-danger ms-1">Expired</span>
@@ -134,7 +134,7 @@
                     <tbody>
                         @forelse($movements as $m)
                             <tr>
-                                <td>
+                                <td class="text-nowrap">
                                     <div>{{ $m->created_at->format('d/m/Y') }}</div>
                                     <small class="text-muted">{{ $m->created_at->format('H:i:s') }}</small>
                                 </td>
@@ -176,11 +176,9 @@
                 </table>
             </div>
         </div>
-        @if($movements->hasPages())
-            <div class="card-footer bg-white border-top py-3">
-                {{ $movements->links() }}
-            </div>
-        @endif
+        <div class="card-footer bg-white border-top py-3">
+            <x-table-footer :paginator="$movements" label="pergerakan stok" />
+        </div>
     </div>
 </div>
 @endsection
