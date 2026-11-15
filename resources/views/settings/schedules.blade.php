@@ -1,18 +1,20 @@
 @extends('layouts.app')
 
 @section('title', 'Jadwal Praktik Dokter')
+@section('page_title', 'Jadwal Praktik Mingguan Dokter')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item active" aria-current="page">Jadwal Praktik Dokter</li>
+@endsection
+
+@section('page_actions')
+    <button type="button" class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
+        <i class="fas fa-calendar-plus me-1"></i> Tambah Jadwal Praktik
+    </button>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Jadwal Praktik Mingguan Dokter</h4>
-            <p class="text-muted small mb-0">Alokasi jadwal dinas dokter, jam pelayanan poli, kuota antrean harian, dan kontrol kapasitas</p>
-        </div>
-        <button type="button" class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
-            <i class="fas fa-calendar-plus me-1"></i> Tambah Jadwal Praktik
-        </button>
-    </div>
+<div class="container-fluid p-0">
 
     <!-- Schedules Table -->
     <div class="card border-0 shadow-sm">
