@@ -1,13 +1,8 @@
 <aside id="sidebar-wrapper">
     <div class="sidebar-brand">
-        <a href="{{ route('dashboard') }}">
-            <div class="brand-icon-box">
-                <i class="fa-solid fa-hospital-user"></i>
-            </div>
-            <div class="brand-text-container">
-                <span class="brand-title">RME KLINIK</span>
-                <span class="brand-subtitle">Sistem Terpadu</span>
-            </div>
+        <a href="{{ route('dashboard') }}" class="brand-link">
+            <img src="{{ asset('images/logo-white.png') }}" alt="Klinik Rawat Inap BeSt Medika" class="brand-logo-full">
+            <img src="{{ asset('images/logo-icon-white.png') }}" alt="BeSt Medika" class="brand-logo-icon">
         </a>
     </div>
 
@@ -229,7 +224,6 @@
                     <div class="user-info-text text-truncate">
                         <div class="user-name fw-bold text-white small text-truncate" style="line-height: 1.2;">{{ auth()->user()->name }}</div>
                         <div class="user-role-badge">
-                            <span class="status-pulse-dot"></span>
                             <span class="text-truncate">{{ auth()->user()->primary_role_name }}</span>
                         </div>
                     </div>
