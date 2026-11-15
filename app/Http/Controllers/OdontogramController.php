@@ -6,7 +6,6 @@ use App\Models\Odontogram;
 use App\Models\Polyclinic;
 use App\Models\Visit;
 use App\Services\OdontogramService;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,16 +15,15 @@ class OdontogramController extends Controller
 {
     public function __construct(protected OdontogramService $odontogramService) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        $today = Carbon::today();
         $polyGigi = Polyclinic::where('type', 'gigi')->first();
 
         $visits = Visit::with(['patient', 'odontogram.teeth'])
-            ->whereDate('registration_date', $today)
-            ->where('polyclinic_id', $polyGigi?->id)
-            ->orderBy('registration_date', 'asc')
-            ->get();
+            ->when($polyGigi, fn ($q) => $q->where('polyclinic_id', $polyGigi->id))
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate($this->perPage($request));
 
         return view('odontogram.index', compact('visits', 'polyGigi'));
     }
