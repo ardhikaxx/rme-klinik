@@ -1,46 +1,16 @@
 <header class="topbar">
-    <div class="d-flex align-items-center gap-3">
-        <button type="button" class="nav-toggle-btn" title="Toggle Navigasi">
+    <div class="d-flex align-items-center gap-2 gap-md-3 min-w-0">
+        <button type="button" class="nav-toggle-btn flex-shrink-0" title="Toggle Navigasi">
             <i class="fa-solid fa-bars-staggered"></i>
         </button>
-        <div class="d-flex align-items-center gap-2">
-            <span class="fw-bold text-dark fs-6 d-none d-md-inline" style="letter-spacing: -0.01em;">
-                Klinik Pratama Sehat Mandiri
-            </span>
-            <span class="badge topbar-badge d-none d-lg-inline-flex align-items-center gap-1">
-                <i class="fa-regular fa-calendar-check text-info"></i>
-                {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
-            </span>
-            <span class="badge topbar-status-badge d-none d-xl-inline-flex align-items-center gap-1">
-                <span class="status-pulse-green"></span>
-                <span>Sistem Siap</span>
-            </span>
+        <div class="d-flex align-items-center gap-2 min-w-0">
+            <h6 class="fw-bold text-dark mb-0 topbar-page-title text-truncate" title="@yield('page_title', 'RME KLINIK Terpadu')">
+                @yield('page_title', 'RME KLINIK Terpadu')
+            </h6>
         </div>
     </div>
 
     <div class="d-flex align-items-center gap-2 gap-md-3">
-        {{-- Fast Shortcut Buttons based on permissions --}}
-        @if(auth()->user()->hasAnyRole(['admisi_kasir', 'kepala_klinik']))
-            <a href="{{ route('patients.create') }}" class="btn btn-sm btn-outline-info rounded-pill px-3 d-none d-sm-inline-flex align-items-center gap-1" style="font-size: 0.82rem; font-weight: 500;">
-                <i class="fa-solid fa-user-plus"></i>
-                <span>Pasien Baru</span>
-            </a>
-            <a href="{{ route('visits.create') }}" class="btn btn-sm btn-rme-primary rounded-pill px-3 d-none d-md-inline-flex align-items-center gap-1" style="font-size: 0.82rem; font-weight: 500;">
-                <i class="fa-solid fa-plus"></i>
-                <span>Registrasi</span>
-            </a>
-        @elseif(auth()->user()->hasRole('dokter'))
-            <a href="{{ route('clinical.index') }}" class="btn btn-sm btn-rme-primary rounded-pill px-3 d-none d-sm-inline-flex align-items-center gap-1" style="font-size: 0.82rem; font-weight: 500;">
-                <i class="fa-solid fa-stethoscope"></i>
-                <span>Antrean Periksa</span>
-            </a>
-        @elseif(auth()->user()->hasRole('perawat_bidan'))
-            <a href="{{ route('nursing.index') }}" class="btn btn-sm btn-rme-primary rounded-pill px-3 d-none d-sm-inline-flex align-items-center gap-1" style="font-size: 0.82rem; font-weight: 500;">
-                <i class="fa-solid fa-user-nurse"></i>
-                <span>Antrean Triage</span>
-            </a>
-        @endif
-
         {{-- User dropdown --}}
         <div class="dropdown">
             <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle user-pill" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
