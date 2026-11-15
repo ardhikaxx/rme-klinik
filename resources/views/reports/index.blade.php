@@ -284,16 +284,8 @@ $(document).ready(function() {
     // Trend Chart
     var trendCtx = document.getElementById('trendChart');
     if (trendCtx) {
-        var trendLabels = [
-            @foreach($dailyTrend as $d)
-                "{{ \Carbon\Carbon::parse($d->date)->format('d M') }}",
-            @endforeach
-        ];
-        var trendValues = [
-            @foreach($dailyTrend as $d)
-                {{ $d->total }},
-            @endforeach
-        ];
+        var trendLabels = @json($dailyTrend['labels'] ?? []);
+        var trendValues = @json($dailyTrend['data'] ?? []);
 
         new Chart(trendCtx, {
             type: 'bar',
@@ -301,7 +293,7 @@ $(document).ready(function() {
                 labels: trendLabels.length > 0 ? trendLabels : ['H-4', 'H-3', 'H-2', 'H-1', 'Hari Ini'],
                 datasets: [{
                     label: 'Jumlah Kunjungan Pasien',
-                    data: trendValues.length > 0 ? trendValues : [5, 8, 12, 10, 15],
+                    data: trendValues.length > 0 ? trendValues : [0, 0, 0, 0, 0],
                     backgroundColor: '#2EACF0',
                     borderRadius: 4
                 }]
@@ -321,23 +313,15 @@ $(document).ready(function() {
     // Polyclinic Doughnut Chart
     var polyCtx = document.getElementById('polyChart');
     if (polyCtx) {
-        var polyLabels = [
-            @foreach($visitsByPoly as $p)
-                "{{ $p->polyclinic_name }}",
-            @endforeach
-        ];
-        var polyValues = [
-            @foreach($visitsByPoly as $p)
-                {{ $p->total }},
-            @endforeach
-        ];
+        var polyLabels = @json($visitsByPoly->pluck('polyclinic_name'));
+        var polyValues = @json($visitsByPoly->pluck('total'));
 
         new Chart(polyCtx, {
             type: 'doughnut',
             data: {
                 labels: polyLabels.length > 0 ? polyLabels : ['Poli Umum', 'Poli Gigi', 'Poli KIA'],
                 datasets: [{
-                    data: polyValues.length > 0 ? polyValues : [20, 10, 5],
+                    data: polyValues.length > 0 ? polyValues : [1, 1, 1],
                     backgroundColor: ['#416B82', '#2EACF0', '#0083C9', '#87B1C7', '#547F96']
                 }]
             },
