@@ -20,9 +20,9 @@ class SettingController extends Controller
     /**
      * Master Tariffs & Medical Fees
      */
-    public function tariffs(): View
+    public function tariffs(Request $request): View
     {
-        $tariffs = ServiceTariff::with('polyclinic')->paginate(20);
+        $tariffs = ServiceTariff::with('polyclinic')->paginate($this->perPage($request));
         $polyclinics = Polyclinic::where('is_active', true)->get();
 
         return view('settings.tariffs', compact('tariffs', 'polyclinics'));
@@ -74,12 +74,12 @@ class SettingController extends Controller
     /**
      * Doctor Schedules Management
      */
-    public function schedules(): View
+    public function schedules(Request $request): View
     {
         $schedules = DoctorSchedule::with(['employee', 'polyclinic'])
             ->orderBy('day_of_week')
             ->orderBy('start_time')
-            ->get();
+            ->paginate($this->perPage($request));
 
         $doctors = Employee::where('profession', 'dokter')->where('is_active', true)->get();
         $polyclinics = Polyclinic::where('is_active', true)->get();
@@ -116,9 +116,9 @@ class SettingController extends Controller
     /**
      * Users & Employees Management
      */
-    public function users(): View
+    public function users(Request $request): View
     {
-        $users = User::with(['roles', 'employee'])->paginate(15);
+        $users = User::with(['roles', 'employee'])->paginate($this->perPage($request));
         $roles = Role::all();
         $departments = Department::where('is_active', true)->get();
 
