@@ -251,7 +251,9 @@ beforeEach(function () {
 
 test('role dashboards render correctly without errors', function () {
     // 1. Kepala Klinik Dashboard
-    $this->actingAs($this->userKepala)->get(route('dashboard'))->assertOk();
+    $resp = $this->actingAs($this->userKepala)->get(route('dashboard'))->assertOk();
+    $resp->assertSee('images/logo-white.png');
+    $resp->assertSee('images/logo-icon-white.png');
 
     // 2. Admisi Dashboard
     $this->actingAs($this->userAdmisi)->get(route('dashboard'))->assertOk();
