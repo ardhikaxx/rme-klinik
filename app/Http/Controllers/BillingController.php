@@ -30,7 +30,7 @@ class BillingController extends Controller
             $query->whereDate('created_at', $date);
         }
 
-        $invoices = $query->paginate(15);
+        $invoices = $query->paginate($this->perPage($request));
         $paymentMethods = PaymentMethod::where('is_active', true)->get();
 
         return view('billing.index', compact('invoices', 'paymentMethods', 'status', 'date'));
