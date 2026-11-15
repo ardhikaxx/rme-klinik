@@ -48,14 +48,17 @@ class GenerateStaticDatasetFiles extends Command
         // 1. Generate Patients & Demographics
         $this->generatePatientDatasets($targetPatients);
 
-        // 2. Generate Master Medicines & Initial Inventory Batches
+        // 2. Generate Master Catalogs (ICD-10, ICD-9-CM, Document Templates, Medical Fee Rules)
+        $this->generateMasterAndCatalogDatasets();
+
+        // 3. Generate Master Medicines & Inventory Batches & Stock Opnames
         $this->generateMedicineAndBatchDatasets();
 
-        // 3. Generate Visits & Complete Operations
+        // 4. Generate Visits & Complete Operations (including active today queue)
         $this->generateOperationalDatasets($targetVisits, $targetPatients);
 
         $this->line('');
-        $this->info('✓ SELURUH FILE DATASET CSV BERHASIL DIBUAT!');
+        $this->info('✓ SELURUH FILE DATASET CSV LENGKAP BERHASIL DIBUAT!');
         $this->info("Lokasi dataset: {$this->outputDir}");
 
         return Command::SUCCESS;
@@ -184,10 +187,15 @@ class GenerateStaticDatasetFiles extends Command
             $rw = str_pad((($i % 8) + 1), 2, '0', STR_PAD_LEFT);
             $phone = '08'.(1200000000 + (($i * 739) % 800000000));
 
+            // Patient registered between 2020 and 2026 (strictly <= 2026-11-15 12:00:00)
             $regYear = 2020 + ($i % 7);
             $regMonth = 1 + (($i * 3) % 12);
             $regDay = 1 + (($i * 7) % 28);
-            $registeredAt = Carbon::create($regYear, $regMonth, $regDay, 8 + ($i % 10), ($i % 60), 0)->toDateTimeString();
+            if ($regYear === 2026 && ($regMonth > 11 || ($regMonth === 11 && $regDay > 15))) {
+                $regMonth = 11;
+                $regDay = 1 + ($i % 15);
+            }
+            $registeredAt = Carbon::create($regYear, $regMonth, $regDay, 8 + ($i % 9), ($i % 60), 0)->toDateTimeString();
 
             $this->writeCsvRow($fpPatients, [
                 $i,
@@ -218,7 +226,7 @@ class GenerateStaticDatasetFiles extends Command
                 $registeredAt,
             ]);
 
-            // ~15% pasien mempunyai alergi
+            // ~15% pasien mempunyai riwayat alergi
             if ($i % 7 === 0) {
                 $al = $allergens[($i / 7) % count($allergens)];
                 $this->writeCsvRow($fpAllergies, [
@@ -228,7 +236,7 @@ class GenerateStaticDatasetFiles extends Command
                     $al['allergen_name'],
                     $al['reaction'],
                     $al['severity'],
-                    'Tercatat pada anamnesis awal',
+                    'Tercatat pada anamnesis awal pendaftaran',
                     $adminUserId,
                     $registeredAt,
                     $registeredAt,
@@ -264,11 +272,146 @@ class GenerateStaticDatasetFiles extends Command
     }
 
     /**
-     * Generate medicines.csv, medicine_batches.csv, medicine_receipts.csv, medicine_receipt_items.csv.
+     * Generate document_templates.csv, medical_fee_rules.csv, icd10_codes.csv, icd9cm_codes.csv.
+     */
+    protected function generateMasterAndCatalogDatasets(): void
+    {
+        $this->comment('2. Membuat dataset master dokumen, tarif jasa medis, ICD-10 & ICD-9-CM...');
+
+        $now = '2020-01-01 08:00:00';
+
+        // 1. Document Templates
+        $fpTemplates = fopen("{$this->outputDir}/document_templates.csv", 'w');
+        fputcsv($fpTemplates, ['id', 'code', 'name', 'type', 'template_body', 'is_active', 'created_at', 'updated_at']);
+
+        $templates = [
+            [
+                1, 'TMPL-SAKIT', 'Surat Keterangan Sakit', 'surat_sakit',
+                'Yang bertanda tangan di bawah ini, Dokter Pemeriksa Klinik Pratama Sehat Mandiri menerangkan bahwa pasien membutuhkan istirahat karena kondisi medis.',
+                1, $now, $now,
+            ],
+            [
+                2, 'TMPL-SEHAT', 'Surat Keterangan Berbadan Sehat', 'surat_sehat',
+                'Menerangkan bahwa pasien telah melalui pemeriksaan fisik dan dinyatakan dalam keadaan sehat jasmani dan rohani pada saat pemeriksaan.',
+                1, $now, $now,
+            ],
+            [
+                3, 'TMPL-RUJUKAN', 'Surat Rujukan Pasien FKRTL', 'rujukan',
+                'Mohon pemeriksaan dan penanganan spesifik lebih lanjut terhadap pasien dengan kondisi dan diagnosis terlampir di fasilitas pelayanan rujukan tingkat lanjut.',
+                1, $now, $now,
+            ],
+            [
+                4, 'TMPL-LAB', 'Surat Pengantar Uji Laboratorium', 'lab',
+                'Mohon dilakukan pemeriksaan spesimen penunjang diagnostik laboratorium klinik sesuai parameter yang tertera.',
+                1, $now, $now,
+            ],
+            [
+                5, 'TMPL-CONSENT', 'Formulir Persetujuan Tindakan Medis (Informed Consent)', 'informed_consent',
+                'Pemberian persetujuan tertulis oleh pasien / keluarga setelah mendapatkan penjelasan lengkap mengenai tujuan, prosedur, risiko, dan komplikasi tindakan medis.',
+                1, $now, $now,
+            ],
+        ];
+        foreach ($templates as $t) {
+            $this->writeCsvRow($fpTemplates, $t);
+        }
+        fclose($fpTemplates);
+
+        // 2. Medical Fee Rules
+        $fpFeeRules = fopen("{$this->outputDir}/medical_fee_rules.csv", 'w');
+        fputcsv($fpFeeRules, ['id', 'name', 'profession', 'calculation_type', 'value', 'description', 'is_active', 'created_at', 'updated_at']);
+
+        $feeRules = [
+            [1, 'Jasa Konsultasi Dokter Umum', 'dokter', 'fixed', 25000.00, 'Tarif tetap jasa medis dokter umum per konsultasi', 1, $now, $now],
+            [2, 'Jasa Konsultasi Dokter Gigi', 'dokter', 'fixed', 35000.00, 'Tarif tetap jasa medis dokter spesialis gigi per konsultasi', 1, $now, $now],
+            [3, 'Jasa Konsultasi Bidan / KIA', 'bidan', 'fixed', 20000.00, 'Tarif tetap jasa perawat/bidan pada poli KIA', 1, $now, $now],
+            [4, 'Jasa Tindakan Medis Dokter', 'dokter', 'percentage', 70.00, 'Alokasi 70% dari tarif tindakan medis poliklinik untuk dokter pelaksana', 1, $now, $now],
+            [5, 'Jasa Asistensi Tindakan Perawat', 'perawat', 'percentage', 15.00, 'Alokasi 15% dari tarif tindakan medis untuk perawat pendamping', 1, $now, $now],
+            [6, 'Jasa Operasional Klinik', 'manajemen', 'percentage', 15.00, 'Alokasi 15% dari tarif tindakan medis untuk klinik dan sarana operasional', 1, $now, $now],
+        ];
+        foreach ($feeRules as $fr) {
+            $this->writeCsvRow($fpFeeRules, $fr);
+        }
+        fclose($fpFeeRules);
+
+        // 3. ICD-10 Codes CSV (parse from public/assets/icd10.json)
+        $path10 = public_path('assets/icd10.json');
+        if (file_exists($path10)) {
+            $content = file_get_contents($path10);
+            $bom = pack('H*', 'EFBBBF');
+            $content = preg_replace("/^$bom/", '', $content);
+            $items10 = json_decode($content, true);
+
+            if (is_array($items10)) {
+                $fpIcd10 = fopen("{$this->outputDir}/icd10_codes.csv", 'w');
+                fputcsv($fpIcd10, ['id', 'code', 'description', 'category', 'is_active', 'created_at', 'updated_at']);
+                $icdId = 1;
+                $seen10 = [];
+                foreach ($items10 as $item) {
+                    $code = trim($item['code'] ?? '');
+                    $desc = trim($item['description'] ?? '');
+                    if ($code === '' || $desc === '' || isset($seen10[$code])) {
+                        continue;
+                    }
+                    $seen10[$code] = true;
+                    $this->writeCsvRow($fpIcd10, [
+                        $icdId++,
+                        $code,
+                        $desc,
+                        substr($code, 0, 1),
+                        1,
+                        $now,
+                        $now,
+                    ]);
+                }
+                fclose($fpIcd10);
+            }
+        }
+
+        // 4. ICD-9-CM Codes CSV (parse from public/assets/icd_9cm.json)
+        $path9 = public_path('assets/icd_9cm.json');
+        if (file_exists($path9)) {
+            $content = file_get_contents($path9);
+            $bom = pack('H*', 'EFBBBF');
+            $content = preg_replace("/^$bom/", '', $content);
+            $items9 = json_decode($content, true);
+
+            if (is_array($items9)) {
+                $fpIcd9 = fopen("{$this->outputDir}/icd9cm_codes.csv", 'w');
+                fputcsv($fpIcd9, ['id', 'code', 'description', 'category', 'is_active', 'created_at', 'updated_at']);
+                $icd9Id = 1;
+                $seen9 = [];
+                foreach ($items9 as $item) {
+                    $code = trim($item['code'] ?? '');
+                    $desc = trim($item['description'] ?? '');
+                    if ($code === '' || $desc === '' || isset($seen9[$code])) {
+                        continue;
+                    }
+                    $seen9[$code] = true;
+                    $category = str_contains($code, '.') ? explode('.', $code)[0] : substr($code, 0, 2);
+                    $this->writeCsvRow($fpIcd9, [
+                        $icd9Id++,
+                        $code,
+                        $desc,
+                        $category,
+                        1,
+                        $now,
+                        $now,
+                    ]);
+                }
+                fclose($fpIcd9);
+            }
+        }
+
+        $this->info('✓ Master Dokumen, Tarif Jasa Medis, ICD-10 & ICD-9-CM selesai dibuat.');
+    }
+
+    /**
+     * Generate medicines.csv, medicine_batches.csv, medicine_receipts.csv, medicine_receipt_items.csv,
+     * medicine_stock_opnames.csv, medicine_stock_opname_items.csv.
      */
     protected function generateMedicineAndBatchDatasets(): void
     {
-        $this->comment('2. Membuat dataset master obat, batch, dan penerimaan farmasi...');
+        $this->comment('3. Membuat dataset master obat, batch, penerimaan, dan stock opname farmasi...');
 
         // Master Medicines Catalog (MED-001 s/d MED-050)
         $newMedicines = [
@@ -330,7 +473,7 @@ class GenerateStaticDatasetFiles extends Command
             'strength', 'purchase_price', 'selling_price', 'min_stock', 'is_active', 'created_at', 'updated_at',
         ]);
 
-        $now = now()->toDateTimeString();
+        $now = '2020-01-01 08:00:00';
         foreach ($newMedicines as $m) {
             $this->writeCsvRow($fpMeds, [
                 $m['id'], $m['code'], $m['generic_name'], $m['brand_name'], $m['category_id'],
@@ -408,15 +551,87 @@ class GenerateStaticDatasetFiles extends Command
         fclose($fpBatches);
         fclose($fpReceipts);
         fclose($fpReceiptItems);
-        $this->info('✓ Master Obat & 150 Batch Farmasi selesai dibuat.');
+
+        // Generate Periodic Stock Opnames (28 sessions: 2020 to 2026)
+        $fpOpnames = fopen("{$this->outputDir}/medicine_stock_opnames.csv", 'w');
+        $fpOpnameItems = fopen("{$this->outputDir}/medicine_stock_opname_items.csv", 'w');
+
+        fputcsv($fpOpnames, ['id', 'opname_number', 'opname_date', 'status', 'notes', 'conducted_by', 'approved_by', 'approved_at', 'created_at', 'updated_at']);
+        fputcsv($fpOpnameItems, ['id', 'medicine_stock_opname_id', 'medicine_id', 'batch_id', 'system_stock', 'physical_stock', 'difference', 'reason', 'created_at', 'updated_at']);
+
+        $opnameDates = [];
+        for ($yr = 2020; $yr <= 2025; $yr++) {
+            $opnameDates[] = "{$yr}-03-31";
+            $opnameDates[] = "{$yr}-06-30";
+            $opnameDates[] = "{$yr}-09-30";
+            $opnameDates[] = "{$yr}-12-31";
+        }
+        $opnameDates[] = '2026-03-31';
+        $opnameDates[] = '2026-06-30';
+        $opnameDates[] = '2026-09-30';
+        $opnameDates[] = '2026-11-14'; // Recent draft/in-progress opname
+
+        $opnameId = 1;
+        $opnameItemId = 1;
+
+        foreach ($opnameDates as $idx => $opDate) {
+            $isLast = ($idx === count($opnameDates) - 1);
+            $status = $isLast ? 'draft' : 'approved';
+            $approverId = $isLast ? null : 6; // dr. Hendro Wicaksono (Kepala)
+            $approvedAt = $isLast ? null : "{$opDate} 17:00:00";
+            $opNumber = 'OPN-'.str_replace('-', '', $opDate).'-'.str_pad($opnameId, 3, '0', STR_PAD_LEFT);
+
+            $this->writeCsvRow($fpOpnames, [
+                $opnameId,
+                $opNumber,
+                $opDate,
+                $status,
+                "Stock opname berkala instalasi farmasi triwulanan {$opDate}",
+                5, // apt. Budi Santoso (Apoteker)
+                $approverId,
+                $approvedAt,
+                "{$opDate} 08:30:00",
+                "{$opDate} 17:00:00",
+            ]);
+
+            // Sample 50 medicines audited in this opname session
+            for ($medId = 1; $medId <= 50; $medId++) {
+                $batchOffset = ($medId - 1) * 3;
+                $activeBatch = $batchOffset + 2; // middle batch (2026)
+                $sysStock = 45000 - ($idx * 300);
+                $diff = ($medId % 15 === 0) ? -1 : (($medId % 20 === 0) ? 1 : 0);
+                $physStock = $sysStock + $diff;
+                $reason = ($diff === 0) ? 'Sesuai catatan sistem kartu stok fisik' : (($diff < 0) ? 'Selisih 1 tablet kerusakan blister penyimpanan' : 'Selisih hitung fisik lebih saat penerimaan');
+
+                $this->writeCsvRow($fpOpnameItems, [
+                    $opnameItemId++,
+                    $opnameId,
+                    $medId,
+                    $activeBatch,
+                    $sysStock,
+                    $physStock,
+                    $diff,
+                    $reason,
+                    "{$opDate} 09:00:00",
+                    "{$opDate} 16:30:00",
+                ]);
+            }
+
+            $opnameId++;
+        }
+
+        fclose($fpOpnames);
+        fclose($fpOpnameItems);
+
+        $this->info('✓ Master Obat, 150 Batch, Penerimaan, dan 28 Sesi Stock Opname selesai dibuat.');
     }
 
     /**
-     * Generate visits.csv and all downstream clinical, pharmacy, lab, and financial CSVs.
+     * Generate visits.csv and all downstream clinical, specialty, pharmacy, lab, and billing CSVs.
      */
     protected function generateOperationalDatasets(int $targetVisits, int $totalPatients): void
     {
-        $this->comment("3. Membuat dataset operasional ({$targetVisits} kunjungan & jutaan transaksi)...");
+        $this->comment("4. Membuat dataset operasional ({$targetVisits} kunjungan & jutaan transaksi operasional)...");
 
         // Open all operational CSV files
         $fpVisits = fopen("{$this->outputDir}/visits.csv", 'w');
@@ -424,6 +639,7 @@ class GenerateStaticDatasetFiles extends Command
         $fpAssessments = fopen("{$this->outputDir}/nursing_assessments.csv", 'w');
         $fpVitals = fopen("{$this->outputDir}/vital_signs.csv", 'w');
         $fpMR = fopen("{$this->outputDir}/medical_records.csv", 'w');
+        $fpAddendums = fopen("{$this->outputDir}/medical_record_addendums.csv", 'w');
         $fpDiagnoses = fopen("{$this->outputDir}/medical_record_diagnoses.csv", 'w');
         $fpProcedures = fopen("{$this->outputDir}/medical_record_procedures.csv", 'w');
         $fpOdontograms = fopen("{$this->outputDir}/odontograms.csv", 'w');
@@ -449,13 +665,15 @@ class GenerateStaticDatasetFiles extends Command
         $fpPatientDocs = fopen("{$this->outputDir}/patient_documents.csv", 'w');
         $fpAudit = fopen("{$this->outputDir}/audit_logs.csv", 'w');
         $fpFhir = fopen("{$this->outputDir}/fhir_mappings.csv", 'w');
+        $fpFhirLogs = fopen("{$this->outputDir}/fhir_sync_logs.csv", 'w');
 
-        // Write Exact Migration-Compliant Headers
+        // Write Migration-Exact Column Headers
         fputcsv($fpVisits, ['id', 'visit_number', 'patient_id', 'polyclinic_id', 'doctor_id', 'registered_by', 'registration_date', 'visit_type', 'payment_type', 'insurance_number', 'status', 'queue_number', 'notes', 'created_at', 'updated_at']);
         fputcsv($fpHistories, ['id', 'visit_id', 'status_from', 'status_to', 'changed_by', 'reason', 'created_at', 'updated_at']);
         fputcsv($fpAssessments, ['id', 'visit_id', 'patient_id', 'nurse_id', 'assessment_time', 'chief_complaint', 'current_illness_history', 'past_illness_history', 'family_illness_history', 'current_medication', 'systolic', 'diastolic', 'temperature', 'pulse_rate', 'respiratory_rate', 'oxygen_saturation', 'weight', 'height', 'bmi', 'waist_circumference', 'consciousness', 'pain_scale', 'fall_risk', 'nursing_care_plan', 'notes', 'created_at', 'updated_at']);
         fputcsv($fpVitals, ['id', 'patient_id', 'visit_id', 'recorded_by', 'recorded_at', 'systolic', 'diastolic', 'temperature', 'pulse_rate', 'respiratory_rate', 'oxygen_saturation', 'weight', 'height', 'bmi', 'created_at', 'updated_at']);
         fputcsv($fpMR, ['id', 'visit_id', 'patient_id', 'doctor_id', 'examination_time', 'subjective', 'objective', 'assessment', 'plan', 'status', 'finalized_at', 'finalized_by', 'education_plan', 'follow_up_plan', 'next_visit_date', 'created_at', 'updated_at']);
+        fputcsv($fpAddendums, ['id', 'medical_record_id', 'doctor_id', 'addendum_content', 'reason', 'created_at']);
         fputcsv($fpDiagnoses, ['id', 'medical_record_id', 'icd10_code', 'description', 'type', 'notes', 'created_at', 'updated_at']);
         fputcsv($fpProcedures, ['id', 'medical_record_id', 'icd9cm_code', 'description', 'tariff', 'notes', 'created_at', 'updated_at']);
         fputcsv($fpOdontograms, ['id', 'visit_id', 'patient_id', 'doctor_id', 'notes', 'created_at', 'updated_at']);
@@ -481,6 +699,7 @@ class GenerateStaticDatasetFiles extends Command
         fputcsv($fpPatientDocs, ['id', 'patient_id', 'visit_id', 'title', 'document_type', 'file_path', 'mime_type', 'file_size', 'uploaded_by', 'created_at', 'updated_at']);
         fputcsv($fpAudit, ['id', 'user_id', 'action', 'module', 'description', 'ip_address', 'user_agent', 'old_values', 'new_values', 'created_at']);
         fputcsv($fpFhir, ['id', 'resource_type', 'local_table', 'local_id', 'fhir_id', 'status', 'last_synced_at', 'created_at', 'updated_at']);
+        fputcsv($fpFhirLogs, ['id', 'fhir_mapping_id', 'resource_type', 'payload', 'response_code', 'response_body', 'error_message', 'attempt', 'synced_at', 'created_at', 'updated_at']);
 
         // Write initial 150 stock receipts movements into movements CSV
         $movementId = 1;
@@ -515,6 +734,7 @@ class GenerateStaticDatasetFiles extends Command
         $assessmentId = 1;
         $vitalsId = 1;
         $mrId = 1;
+        $addendumId = 1;
         $diagnosisId = 1;
         $procedureId = 1;
         $odontogramId = 1;
@@ -539,6 +759,7 @@ class GenerateStaticDatasetFiles extends Command
         $patientDocId = 1;
         $auditId = 1;
         $fhirId = 1;
+        $fhirLogId = 1;
 
         // In-memory stock tracker for FEFO
         $batchStockTracker = [];
@@ -547,19 +768,21 @@ class GenerateStaticDatasetFiles extends Command
         }
 
         $startDate = Carbon::create(2020, 1, 2, 8, 0, 0);
-        $totalDays = 2510; // 2020-01-02 to 2026-11-15
+        $totalHistoricalDays = 2508; // 2020-01-02 to 2026-11-14
+        $historicalVisitsCount = $targetVisits - 80; // 199,920 visits
 
         $bar = $this->output->createProgressBar($targetVisits);
         $bar->start();
 
         for ($i = 1; $i <= $targetVisits; $i++) {
+            $isTodayActive = ($i > $historicalVisitsCount); // Visits 199,921 to 200,000 on 2026-11-15
             $patientId = (($i * 31) % $totalPatients) + 1;
 
             // Polyclinic allocation: Poli Umum (60%), Poli Gigi (20%), Poli KIA (20%)
             $polyMod = $i % 10;
             if ($polyMod < 6) {
                 $polyclinicId = 1; // Poli Umum
-                $doctorId = 3; // dr. Ahmad Fauzi
+                $doctorId = 3; // dr. Ahmad Fauzi Pratama
             } elseif ($polyMod < 8) {
                 $polyclinicId = 2; // Poli Gigi
                 $doctorId = 4; // drg. Maya Anggraini
@@ -569,24 +792,7 @@ class GenerateStaticDatasetFiles extends Command
             }
             $nurseId = 2; // Siti Rahayu
 
-            // Realistic chronological date distribution (2020 to 2026)
-            $dayOffset = (int) (($i / $targetVisits) * $totalDays);
-            $regDate = (clone $startDate)->addDays($dayOffset);
-
-            // Skip Sundays
-            if ($regDate->dayOfWeek === Carbon::SUNDAY) {
-                $regDate->addDay();
-            }
-
-            $hour = 8 + (($i * 7) % 8); // 08:00 to 15:00
-            $minute = ($i * 13) % 60;
-            $second = ($i * 17) % 60;
-            $regTime = (clone $regDate)->setTime($hour, $minute, $second);
-
-            $visitDateStr = $regTime->toDateString();
-            $visitNumber = 'VIS-'.$regTime->format('Ymd').'-'.str_pad($i, 5, '0', STR_PAD_LEFT);
-            $queueNumber = 'A-'.str_pad((($i % 45) + 1), 3, '0', STR_PAD_LEFT);
-
+            // Payment method
             $payTypeMod = $i % 10;
             if ($payTypeMod < 6) {
                 $payMethodType = 'bpjs';
@@ -599,9 +805,86 @@ class GenerateStaticDatasetFiles extends Command
                 $insuranceNumber = 'PRU-'.(1000000 + ($i % 900000));
             }
 
-            $isCancelled = ($i % 25 === 0); // 4% cancelled
-            $status = $isCancelled ? 'dibatalkan' : 'selesai';
-            $cancelReason = $isCancelled ? 'Pasien membatalkan antrean karena keperluan mendesak' : null;
+            // Determine timestamps & status based on whether it is historical or today
+            if (! $isTodayActive) {
+                // Historical visits (2020-01-02 to 2026-11-14)
+                $dayOffset = (int) (($i / $historicalVisitsCount) * $totalHistoricalDays);
+                $regDate = (clone $startDate)->addDays($dayOffset);
+                if ($regDate->greaterThanOrEqualTo(Carbon::create(2026, 11, 15, 0, 0, 0))) {
+                    $regDate = Carbon::create(2026, 11, 14, 8, 0, 0);
+                }
+
+                $hour = 8 + (($i * 7) % 8); // 08:00 to 15:00
+                $minute = ($i * 13) % 60;
+                $second = ($i * 17) % 60;
+                $regTime = (clone $regDate)->setTime($hour, $minute, $second);
+
+                $isCancelled = ($i % 25 === 0); // 4% cancelled
+                $status = $isCancelled ? 'dibatalkan' : 'selesai';
+                $cancelReason = $isCancelled ? 'Pasien membatalkan antrean karena keperluan mendesak' : null;
+                $todayStage = 'historical';
+            } else {
+                // TODAY'S VISITS (2026-11-15) - Active Clinical Queue
+                $todayOffset = $i - $historicalVisitsCount; // 1 to 80
+                $regDate = Carbon::create(2026, 11, 15, 8, 0, 0);
+
+                if ($todayOffset <= 30) {
+                    // Morning shift completed (08:00 - 11:30)
+                    $hour = 8 + (int) (($todayOffset - 1) / 8);
+                    $minute = ($todayOffset * 7) % 60;
+                    $regTime = (clone $regDate)->setTime($hour, $minute, 0);
+                    $status = 'selesai';
+                    $cancelReason = null;
+                    $isCancelled = false;
+                    $todayStage = 'selesai';
+                } elseif ($todayOffset <= 40) {
+                    // Waiting for Cashier Payment (12:00 - 13:15)
+                    $regTime = (clone $regDate)->setTime(12, 10 + (($todayOffset - 31) * 6), 0);
+                    $status = 'menunggu_pembayaran';
+                    $cancelReason = null;
+                    $isCancelled = false;
+                    $todayStage = 'menunggu_pembayaran';
+                } elseif ($todayOffset <= 50) {
+                    // Waiting at Pharmacy (13:30 - 14:30)
+                    $regTime = (clone $regDate)->setTime(13, 30 + (($todayOffset - 41) * 6), 0);
+                    $status = 'menunggu_farmasi';
+                    $cancelReason = null;
+                    $isCancelled = false;
+                    $todayStage = 'menunggu_farmasi';
+                } elseif ($todayOffset <= 60) {
+                    // Waiting for / In Doctor Examination (14:30 - 15:30)
+                    $regTime = (clone $regDate)->setTime(14, 30 + (($todayOffset - 51) * 6), 0);
+                    $status = ($todayOffset % 2 === 0) ? 'pemeriksaan_dokter_berlangsung' : 'menunggu_dokter';
+                    $cancelReason = null;
+                    $isCancelled = false;
+                    $todayStage = 'dokter';
+                } elseif ($todayOffset <= 70) {
+                    // Waiting for / In Nurse Triage (15:30 - 16:30)
+                    $regTime = (clone $regDate)->setTime(15, 30 + (($todayOffset - 61) * 6), 0);
+                    $status = ($todayOffset % 2 === 0) ? 'pemeriksaan_awal_berlangsung' : 'menunggu_pemeriksaan_awal';
+                    $cancelReason = null;
+                    $isCancelled = false;
+                    $todayStage = 'perawat';
+                } elseif ($todayOffset <= 78) {
+                    // Newly Registered at Admission (16:30 - 17:15)
+                    $regTime = (clone $regDate)->setTime(16, 30 + (($todayOffset - 71) * 5), 0);
+                    $status = 'terdaftar';
+                    $cancelReason = null;
+                    $isCancelled = false;
+                    $todayStage = 'terdaftar';
+                } else {
+                    // Cancelled today
+                    $regTime = (clone $regDate)->setTime(17, 20 + (($todayOffset - 79) * 5), 0);
+                    $status = 'dibatalkan';
+                    $cancelReason = 'Pasien berhalangan dan menjadwalkan ulang besok';
+                    $isCancelled = true;
+                    $todayStage = 'cancelled';
+                }
+            }
+
+            $visitDateStr = $regTime->toDateString();
+            $visitNumber = 'VIS-'.$regTime->format('Ymd').'-'.str_pad($i, 5, '0', STR_PAD_LEFT);
+            $queueNumber = 'A-'.str_pad((($i % 45) + 1), 3, '0', STR_PAD_LEFT);
 
             // 1. Visit Row
             $this->writeCsvRow($fpVisits, [
@@ -611,13 +894,13 @@ class GenerateStaticDatasetFiles extends Command
                 $polyclinicId,
                 $doctorId,
                 1, // registered_by
-                $regTime->toDateTimeString(), // registration_date
-                'lama', // visit_type ('baru', 'lama')
-                $payMethodType, // payment_type ('umum', 'bpjs', 'asuransi_lain')
+                $regTime->toDateTimeString(),
+                'lama',
+                $payMethodType,
                 $insuranceNumber,
-                $status, // enum status
+                $status,
                 $queueNumber,
-                $cancelReason, // notes
+                $cancelReason,
                 $regTime->toDateTimeString(),
                 $isCancelled ? $regTime->toDateTimeString() : (clone $regTime)->addMinutes(90)->toDateTimeString(),
             ]);
@@ -653,19 +936,34 @@ class GenerateStaticDatasetFiles extends Command
                 continue;
             }
 
-            // Timeline progression
-            $assessTime = (clone $regTime)->addMinutes(10 + ($i % 10));
-            $examTime = (clone $assessTime)->addMinutes(15 + ($i % 15));
-            $dispTime = (clone $examTime)->addMinutes(20 + ($i % 10));
-            $payTime = (clone $dispTime)->addMinutes(10 + ($i % 10));
+            // Progression timelines
+            $assessTime = (clone $regTime)->addMinutes(10);
+            $examTime = (clone $assessTime)->addMinutes(15);
+            $dispTime = (clone $examTime)->addMinutes(20);
+            $payTime = (clone $dispTime)->addMinutes(10);
+
+            // Write status transitions depending on stage
+            if ($todayStage === 'terdaftar') {
+                if ($i % 5000 === 0) {
+                    $bar->advance(5000);
+                }
+
+                continue;
+            }
 
             $this->writeCsvRow($fpHistories, [$historyId++, $i, 'terdaftar', 'menunggu_pemeriksaan_awal', 1, 'Menunggu antrean triage perawat', $regTime->toDateTimeString(), $regTime->toDateTimeString()]);
-            $this->writeCsvRow($fpHistories, [$historyId++, $i, 'menunggu_pemeriksaan_awal', 'pemeriksaan_awal_berlangsung', $nurseId, 'Pemeriksaan vital sign dan anamnesis', $assessTime->toDateTimeString(), $assessTime->toDateTimeString()]);
-            $this->writeCsvRow($fpHistories, [$historyId++, $i, 'pemeriksaan_awal_berlangsung', 'pemeriksaan_dokter_berlangsung', $doctorId, 'Pemeriksaan dokter dan penegakan diagnosis', $examTime->toDateTimeString(), $examTime->toDateTimeString()]);
-            $this->writeCsvRow($fpHistories, [$historyId++, $i, 'pemeriksaan_dokter_berlangsung', 'menunggu_farmasi', 5, 'Resep disiapkan di instalasi farmasi', $dispTime->toDateTimeString(), $dispTime->toDateTimeString()]);
-            $this->writeCsvRow($fpHistories, [$historyId++, $i, 'menunggu_farmasi', 'selesai', 1, 'Pembayaran kasir dan penyerahan obat selesai', $payTime->toDateTimeString(), $payTime->toDateTimeString()]);
 
-            // Determine Clinical Scenario
+            if ($status === 'menunggu_pemeriksaan_awal') {
+                if ($i % 5000 === 0) {
+                    $bar->advance(5000);
+                }
+
+                continue;
+            }
+
+            $this->writeCsvRow($fpHistories, [$historyId++, $i, 'menunggu_pemeriksaan_awal', 'pemeriksaan_awal_berlangsung', $nurseId, 'Pemeriksaan vital sign dan anamnesis', $assessTime->toDateTimeString(), $assessTime->toDateTimeString()]);
+
+            // Determine Clinical Scenario (with high laboratory probability >= 50,000)
             $scenario = $this->determineScenario($polyclinicId, $i);
 
             // 3. Nursing Assessment
@@ -723,6 +1021,32 @@ class GenerateStaticDatasetFiles extends Command
                 $assessTime->toDateTimeString(),
             ]);
 
+            if ($status === 'pemeriksaan_awal_berlangsung') {
+                $assessmentId++;
+                if ($i % 5000 === 0) {
+                    $bar->advance(5000);
+                }
+
+                continue;
+            }
+
+            $this->writeCsvRow($fpHistories, [$historyId++, $i, 'pemeriksaan_awal_berlangsung', 'menunggu_dokter', 1, 'Menunggu antrean masuk ruang dokter', (clone $assessTime)->addMinutes(5)->toDateTimeString(), (clone $assessTime)->addMinutes(5)->toDateTimeString()]);
+
+            if ($status === 'menunggu_dokter') {
+                $assessmentId++;
+                if ($i % 5000 === 0) {
+                    $bar->advance(5000);
+                }
+
+                continue;
+            }
+
+            $this->writeCsvRow($fpHistories, [$historyId++, $i, 'menunggu_dokter', 'pemeriksaan_dokter_berlangsung', $doctorId, 'Pemeriksaan dokter dan penegakan diagnosis', $examTime->toDateTimeString(), $examTime->toDateTimeString()]);
+
+            // Determine if this medical record receives an addendum (~1,000 cases)
+            $isAddended = (! $isTodayActive && $i % 190 === 15);
+            $mrStatus = $isAddended ? 'addended' : (($status === 'pemeriksaan_dokter_berlangsung') ? 'draft' : 'final');
+
             // 5. Medical Record
             $this->writeCsvRow($fpMR, [
                 $mrId,
@@ -734,15 +1058,28 @@ class GenerateStaticDatasetFiles extends Command
                 $scenario['objective'],
                 $scenario['assessment'],
                 $scenario['plan'],
-                'final',
-                $examTime->toDateTimeString(),
-                1,
+                $mrStatus,
+                ($mrStatus !== 'draft') ? $examTime->toDateTimeString() : null,
+                ($mrStatus !== 'draft') ? 1 : null,
                 $scenario['education'],
                 'Kontrol kembali bila keluhan belum membaik dalam 3 hari',
                 (clone $regTime)->addDays(7)->toDateString(),
                 $examTime->toDateTimeString(),
                 $examTime->toDateTimeString(),
             ]);
+
+            // Addendum Record if applicable
+            if ($isAddended) {
+                $addendumTime = (clone $examTime)->addHours(2);
+                $this->writeCsvRow($fpAddendums, [
+                    $addendumId++,
+                    $mrId,
+                    $doctorId,
+                    "Catatan Tambahan Dokter Penanggung Jawab: Hasil pemeriksaan evaluasi menunjukkan respons klinis baik terhadap terapi {$scenario['assessment']}. Pasien diedukasi untuk kepatuhan medikasi lanjutan.",
+                    'Pencatatan perkembangan klinis pasien pasca penyerahan resep',
+                    $addendumTime->toDateTimeString(),
+                ]);
+            }
 
             // 6. Diagnoses (Primary + Secondary)
             $this->writeCsvRow($fpDiagnoses, [
@@ -769,7 +1106,7 @@ class GenerateStaticDatasetFiles extends Command
                 ]);
             }
 
-            // 7. Procedure
+            // 7. Procedures
             $this->writeCsvRow($fpProcedures, [
                 $procedureId++,
                 $mrId,
@@ -783,7 +1120,7 @@ class GenerateStaticDatasetFiles extends Command
 
             // Specialty Modules
             if ($polyclinicId === 2) {
-                // Odontogram
+                // Odontogram (Poli Gigi)
                 $this->writeCsvRow($fpOdontograms, [
                     $odontogramId,
                     $i,
@@ -803,15 +1140,16 @@ class GenerateStaticDatasetFiles extends Command
                 $this->writeCsvRow($fpOdontogramTeeth, [$odontogramToothId++, $odontogramId, $toothSecondary, 'sound', 'none', 'Mahkota utuh sehat', $examTime->toDateTimeString(), $examTime->toDateTimeString()]);
                 $odontogramId++;
             } elseif ($polyclinicId === 3) {
+                // Poli KIA
                 if ($scenario['is_anc']) {
                     $this->writeCsvRow($fpAntenatal, [
                         $ancId++,
                         $i,
                         $patientId,
                         $doctorId,
-                        2, // gravida
-                        1, // para
-                        0, // abortus
+                        2,
+                        1,
+                        0,
                         (clone $regTime)->subWeeks($scenario['gestational_weeks'])->toDateString(),
                         (clone $regTime)->addWeeks(40 - $scenario['gestational_weeks'])->toDateString(),
                         $scenario['gestational_weeks'],
@@ -845,8 +1183,24 @@ class GenerateStaticDatasetFiles extends Command
                 }
             }
 
+            if ($status === 'pemeriksaan_dokter_berlangsung') {
+                $assessmentId++;
+                $mrId++;
+                if ($i % 5000 === 0) {
+                    $bar->advance(5000);
+                }
+
+                continue;
+            }
+
+            $this->writeCsvRow($fpHistories, [$historyId++, $i, 'pemeriksaan_dokter_berlangsung', 'menunggu_farmasi', 5, 'Resep disiapkan di instalasi farmasi', $dispTime->toDateTimeString(), $dispTime->toDateTimeString()]);
+
             // 8. Prescription
             $rxNumber = 'RX-'.$regTime->format('Ymd').'-'.str_pad($rxId, 5, '0', STR_PAD_LEFT);
+            $rxStatus = ($status === 'menunggu_farmasi') ? (($i % 2 === 0) ? 'menunggu_verifikasi' : 'disiapkan') : 'selesai';
+            $rxVerifiedAt = ($rxStatus !== 'menunggu_verifikasi') ? (clone $examTime)->addMinutes(5)->toDateTimeString() : null;
+            $rxDispensedAt = ($rxStatus === 'selesai') ? $dispTime->toDateTimeString() : null;
+
             $this->writeCsvRow($fpPrescriptions, [
                 $rxId,
                 $rxNumber,
@@ -854,20 +1208,17 @@ class GenerateStaticDatasetFiles extends Command
                 $mrId,
                 $doctorId,
                 $examTime->toDateTimeString(),
-                'selesai',
+                $rxStatus,
                 'Minum obat secara teratur sesuai petunjuk dokter/apoteker',
-                'Telaah resep selesai dan obat diserahkan lengkap',
-                1,
-                (clone $examTime)->addMinutes(5)->toDateTimeString(),
-                $dispTime->toDateTimeString(),
+                ($rxStatus === 'selesai') ? 'Telaah resep selesai dan obat diserahkan lengkap' : 'Resep dalam antrean verifikasi farmasi',
+                ($rxVerifiedAt) ? 1 : null,
+                $rxVerifiedAt,
+                $rxDispensedAt,
                 $examTime->toDateTimeString(),
-                $dispTime->toDateTimeString(),
+                ($rxDispensedAt) ?: $examTime->toDateTimeString(),
             ]);
 
-            // 9. Dispensing Transaction
-            $dispNumber = 'DSP-'.$regTime->format('Ymd').'-'.str_pad($dispId, 5, '0', STR_PAD_LEFT);
-
-            // Prescription Items & FEFO Dispensing Items
+            // Prescription Items & FEFO Dispensing
             $rxItemsTotal = 0;
             foreach ($scenario['medicines'] as $medIndex => $medInfo) {
                 $medId = $medInfo['id'];
@@ -892,46 +1243,48 @@ class GenerateStaticDatasetFiles extends Command
                     $examTime->toDateTimeString(),
                 ]);
 
-                // FEFO Batch Allocation (batch 1, 2, or 3 for that medicine)
+                // FEFO Batch Allocation
                 $batchOffset = ($medId - 1) * 3;
                 $allocatedBatchId = $batchOffset + 1; // 2024 batch
                 if ($regTime->year >= 2025) {
                     $allocatedBatchId = $batchOffset + 2; // 2026 batch
                 }
 
-                $this->writeCsvRow($fpDispensingItems, [
-                    $dispItemId++,
-                    $dispId,
-                    $currentRxItemId,
-                    $medId,
-                    $allocatedBatchId,
-                    $qty,
-                    $unitPrice,
-                    $subtotal,
-                    $dispTime->toDateTimeString(),
-                    $dispTime->toDateTimeString(),
-                ]);
+                if ($rxStatus === 'selesai' || $status === 'menunggu_pembayaran') {
+                    $this->writeCsvRow($fpDispensingItems, [
+                        $dispItemId++,
+                        $dispId,
+                        $currentRxItemId,
+                        $medId,
+                        $allocatedBatchId,
+                        $qty,
+                        $unitPrice,
+                        $subtotal,
+                        $dispTime->toDateTimeString(),
+                        $dispTime->toDateTimeString(),
+                    ]);
 
-                // Stock Movement (negative quantity for reduction)
-                $stockBefore = $batchStockTracker[$allocatedBatchId];
-                $stockAfter = max(0, $stockBefore - $qty);
-                $batchStockTracker[$allocatedBatchId] = $stockAfter;
+                    // Stock Movement
+                    $stockBefore = $batchStockTracker[$allocatedBatchId];
+                    $stockAfter = max(0, $stockBefore - $qty);
+                    $batchStockTracker[$allocatedBatchId] = $stockAfter;
 
-                $this->writeCsvRow($fpMovements, [
-                    $movementId++,
-                    $medId,
-                    $allocatedBatchId,
-                    'dispense',
-                    -$qty,
-                    $stockBefore,
-                    $stockAfter,
-                    'dispensing_transaction',
-                    $dispId,
-                    "Penyerahan Resep {$rxNumber}",
-                    1,
-                    $dispTime->toDateTimeString(),
-                    $dispTime->toDateTimeString(),
-                ]);
+                    $this->writeCsvRow($fpMovements, [
+                        $movementId++,
+                        $medId,
+                        $allocatedBatchId,
+                        'dispense',
+                        -$qty,
+                        $stockBefore,
+                        $stockAfter,
+                        'dispensing_transaction',
+                        $dispId,
+                        "Penyerahan Resep {$rxNumber}",
+                        1,
+                        $dispTime->toDateTimeString(),
+                        $dispTime->toDateTimeString(),
+                    ]);
+                }
             }
 
             // Compounds for ~8% visits
@@ -957,20 +1310,25 @@ class GenerateStaticDatasetFiles extends Command
                 $compoundId++;
             }
 
-            $this->writeCsvRow($fpDispensing, [
-                $dispId,
-                $dispNumber,
-                $rxId,
-                $i,
-                1,
-                $dispTime->toDateTimeString(),
-                $rxItemsTotal + $compoundTotal,
-                'Pasien telah diedukasi aturan minum obat dan kemungkinan efek samping ringan',
-                $dispTime->toDateTimeString(),
-                $dispTime->toDateTimeString(),
-            ]);
+            // 9. Dispensing Transaction (recorded if ready or completed)
+            if ($rxStatus === 'selesai' || $status === 'menunggu_pembayaran') {
+                $dispNumber = 'DSP-'.$regTime->format('Ymd').'-'.str_pad($dispId, 5, '0', STR_PAD_LEFT);
+                $this->writeCsvRow($fpDispensing, [
+                    $dispId,
+                    $dispNumber,
+                    $rxId,
+                    $i,
+                    1,
+                    $dispTime->toDateTimeString(),
+                    $rxItemsTotal + $compoundTotal,
+                    'Pasien telah diedukasi aturan minum obat dan kemungkinan efek samping ringan',
+                    $dispTime->toDateTimeString(),
+                    $dispTime->toDateTimeString(),
+                ]);
+                $dispId++;
+            }
 
-            // Laboratory Request (~19% visits)
+            // 10. Laboratory Request (Target >= 50.000: ~81.000 requests)
             $labTotal = 0;
             if ($scenario['needs_lab']) {
                 $labReqNumber = 'LAB-'.$regTime->format('Ymd').'-'.str_pad($labReqId, 5, '0', STR_PAD_LEFT);
@@ -1006,7 +1364,7 @@ class GenerateStaticDatasetFiles extends Command
                     $scenario['laboratory_id'],
                     $scenario['lab_result_val'],
                     $scenario['lab_abnormal'] ? 1 : 0,
-                    'Pemeriksaan sesuai SOP lab',
+                    'Pemeriksaan sesuai SOP laboratorium klinik',
                     1,
                     1,
                     (clone $examTime)->addMinutes(25)->toDateTimeString(),
@@ -1018,7 +1376,18 @@ class GenerateStaticDatasetFiles extends Command
                 $labReqId++;
             }
 
-            // 10. Billing Invoice & Items
+            if ($status === 'menunggu_farmasi') {
+                $assessmentId++;
+                $mrId++;
+                $rxId++;
+                if ($i % 5000 === 0) {
+                    $bar->advance(5000);
+                }
+
+                continue;
+            }
+
+            // 11. Billing Invoice & Items
             $invNumber = 'INV-'.$regTime->format('Ymd').'-'.str_pad($invId, 5, '0', STR_PAD_LEFT);
             $admFee = 15000;
             $consultFee = $scenario['consult_fee'];
@@ -1027,6 +1396,11 @@ class GenerateStaticDatasetFiles extends Command
             $discount = 0;
             $finalAmount = $totalAmount - $discount;
 
+            $isPendingCashier = ($status === 'menunggu_pembayaran');
+            $invStatus = $isPendingCashier ? 'belum_dibayar' : 'lunas';
+            $paidAmount = $isPendingCashier ? 0 : $finalAmount;
+            $balanceAmount = $isPendingCashier ? $finalAmount : 0;
+
             $this->writeCsvRow($fpInvoices, [
                 $invId,
                 $invNumber,
@@ -1034,11 +1408,11 @@ class GenerateStaticDatasetFiles extends Command
                 $patientId,
                 $totalAmount,
                 $discount,
-                null, // discount_reason
+                null,
                 $finalAmount,
-                $finalAmount, // paid_amount
-                0, // balance_amount
-                'lunas', // status
+                $paidAmount,
+                $balanceAmount,
+                $invStatus,
                 1,
                 $payTime->toDateTimeString(),
                 $payTime->toDateTimeString(),
@@ -1060,7 +1434,22 @@ class GenerateStaticDatasetFiles extends Command
                 $this->writeCsvRow($fpBillingItems, [$billingItemId++, $invId, 'laboratorium', 'TRF-LAB', $scenario['lab_name'], 1, $labTotal, $labTotal, 'laboratories', $scenario['laboratory_id'], $payTime->toDateTimeString(), $payTime->toDateTimeString()]);
             }
 
-            // 11. Payment Receipt
+            if ($status === 'menunggu_pembayaran') {
+                $assessmentId++;
+                $mrId++;
+                $rxId++;
+                $invId++;
+                if ($i % 5000 === 0) {
+                    $bar->advance(5000);
+                }
+
+                continue;
+            }
+
+            $this->writeCsvRow($fpHistories, [$historyId++, $i, 'menunggu_farmasi', 'menunggu_pembayaran', 1, 'Menunggu antrean kasir pembayaran', (clone $dispTime)->addMinutes(5)->toDateTimeString(), (clone $dispTime)->addMinutes(5)->toDateTimeString()]);
+            $this->writeCsvRow($fpHistories, [$historyId++, $i, 'menunggu_pembayaran', 'selesai', 1, 'Pembayaran kasir lunas dan pelayanan selesai', $payTime->toDateTimeString(), $payTime->toDateTimeString()]);
+
+            // 12. Payment Receipt (for completed visits)
             $rcptNumber = 'KW-'.$regTime->format('Ymd').'-'.str_pad($invId, 5, '0', STR_PAD_LEFT);
             $payMethodId = 1 + ($i % 4);
 
@@ -1080,7 +1469,7 @@ class GenerateStaticDatasetFiles extends Command
             ]);
 
             // Rare realistic refunds (~2% for testing refund module)
-            if ($i % 50 === 3) {
+            if (! $isTodayActive && $i % 50 === 3) {
                 $this->writeCsvRow($fpRefunds, [
                     $refundId,
                     $invId,
@@ -1088,7 +1477,7 @@ class GenerateStaticDatasetFiles extends Command
                     'REF-'.$regTime->format('Ymd').'-'.str_pad($refundId, 4, '0', STR_PAD_LEFT),
                     $finalAmount,
                     'Pengembalian dana klaim revisi jaminan asuransi',
-                    1, // approved_by
+                    1,
                     (clone $payTime)->addHours(2)->toDateTimeString(),
                     (clone $payTime)->addHours(2)->toDateTimeString(),
                     (clone $payTime)->addHours(2)->toDateTimeString(),
@@ -1097,7 +1486,7 @@ class GenerateStaticDatasetFiles extends Command
             }
             $paymentId++;
 
-            // 12. Medical Fee Transactions (Jasa Medis)
+            // 13. Medical Fee Transactions (Jasa Medis)
             $this->writeCsvRow($fpFees, [
                 $feeId++,
                 null,
@@ -1112,7 +1501,7 @@ class GenerateStaticDatasetFiles extends Command
                 $payTime->toDateTimeString(),
             ]);
 
-            // 13. Medical Documents (~14% visits)
+            // 14. Medical Documents (~14% visits)
             if ($i % 7 === 0) {
                 $docTypes = ['surat_keterangan_sakit', 'surat_keterangan_sehat', 'surat_rujukan'];
                 $docType = $docTypes[$i % count($docTypes)];
@@ -1139,7 +1528,7 @@ class GenerateStaticDatasetFiles extends Command
                 ]);
             }
 
-            // 14. Patient Documents (~4% visits)
+            // 15. Patient Documents (~4% visits)
             if ($i % 25 === 7) {
                 $this->writeCsvRow($fpPatientDocs, [
                     $patientDocId++,
@@ -1156,7 +1545,7 @@ class GenerateStaticDatasetFiles extends Command
                 ]);
             }
 
-            // 15. Audit Trail Log (~25% visits)
+            // 16. Audit Trail Log (~25% visits)
             if ($i % 4 === 0) {
                 $this->writeCsvRow($fpAudit, [
                     $auditId++,
@@ -1172,10 +1561,11 @@ class GenerateStaticDatasetFiles extends Command
                 ]);
             }
 
-            // 16. FHIR SatuSehat Mapping (~25% visits)
+            // 17. FHIR SatuSehat Mapping & Sync Logs (~25% visits)
             if ($i % 4 === 0) {
+                $currentFhirId = $fhirId++;
                 $this->writeCsvRow($fpFhir, [
-                    $fhirId++,
+                    $currentFhirId,
                     'Encounter',
                     'visits',
                     $i,
@@ -1185,12 +1575,39 @@ class GenerateStaticDatasetFiles extends Command
                     $examTime->toDateTimeString(),
                     $payTime->toDateTimeString(),
                 ]);
+
+                $payloadJson = json_encode([
+                    'resourceType' => 'Encounter',
+                    'id' => 'enc-'.$visitNumber,
+                    'status' => 'finished',
+                    'class' => ['code' => 'AMB', 'display' => 'ambulatory'],
+                    'subject' => ['reference' => "Patient/{$patientId}"],
+                ]);
+
+                $responseJson = json_encode([
+                    'resourceType' => 'Encounter',
+                    'id' => 'enc-'.$visitNumber,
+                    'response' => ['status' => '201 Created'],
+                ]);
+
+                $this->writeCsvRow($fpFhirLogs, [
+                    $fhirLogId++,
+                    $currentFhirId,
+                    'Encounter',
+                    $payloadJson,
+                    201,
+                    $responseJson,
+                    null,
+                    1,
+                    $payTime->toDateTimeString(),
+                    $payTime->toDateTimeString(),
+                    $payTime->toDateTimeString(),
+                ]);
             }
 
             $assessmentId++;
             $mrId++;
             $rxId++;
-            $dispId++;
             $invId++;
 
             if ($i % 5000 === 0) {
@@ -1206,6 +1623,7 @@ class GenerateStaticDatasetFiles extends Command
         fclose($fpAssessments);
         fclose($fpVitals);
         fclose($fpMR);
+        fclose($fpAddendums);
         fclose($fpDiagnoses);
         fclose($fpProcedures);
         fclose($fpOdontograms);
@@ -1231,19 +1649,20 @@ class GenerateStaticDatasetFiles extends Command
         fclose($fpPatientDocs);
         fclose($fpAudit);
         fclose($fpFhir);
+        fclose($fpFhirLogs);
 
         $this->line('');
         $this->info("✓ Seluruh file dataset operasional ({$targetVisits} kunjungan) berhasil dibuat.");
     }
 
     /**
-     * Map diverse clinical scenarios across polyclinics.
+     * Map diverse clinical scenarios across polyclinics with realistic lab tests (>= 50,000 lab orders).
      */
     protected function determineScenario(int $polyclinicId, int $seed): array
     {
         if ($polyclinicId === 2) {
             // Dental Scenarios
-            $dSeed = $seed % 4;
+            $dSeed = $seed % 3;
             if ($dSeed === 0) {
                 return [
                     'chief_complaint' => 'Gigi geraham belakang berlubang dan ngilu saat minum dingin',
@@ -1324,6 +1743,20 @@ class GenerateStaticDatasetFiles extends Command
                 // ANC
                 $weeks = 12 + ($seed % 26);
                 $fundal = max(12, $weeks - 2);
+                $needsAncLab = ($seed % 2 === 0);
+                $isProteinUrine = ($seed % 4 === 0);
+
+                $labInfo = $isProteinUrine
+                    ? [
+                        'laboratory_id' => 5, 'lab_name' => 'Urin Rutin Lengkap (Proteinuria ANC)', 'lab_price' => 40000,
+                        'lab_clinical_notes' => 'Skrining preeklampsia rutin pada ibu hamil trimester 2 & 3',
+                        'lab_result_val' => 'Protein: Negatif (-), Glukosa: (-)', 'lab_abnormal' => false,
+                    ]
+                    : [
+                        'laboratory_id' => 1, 'lab_name' => 'Darah Lengkap (Skrining Anemia ANC)', 'lab_price' => 65000,
+                        'lab_clinical_notes' => 'Pemeriksaan kadar hemoglobin dan leukosit antenatal care',
+                        'lab_result_val' => 'Hb: 11.2 g/dL (Anemia Ringan), Leu: 8.500 /uL', 'lab_abnormal' => true,
+                    ];
 
                 return [
                     'chief_complaint' => 'Kontrol rutin kehamilan trimester 2, keluhan pusing ringan dan mual kadang-kadang',
@@ -1344,7 +1777,13 @@ class GenerateStaticDatasetFiles extends Command
                         ['id' => 40, 'qty' => 30, 'price' => 600, 'dosage' => '1 Tab', 'frequency' => '1x1 malam', 'instructions' => 'Sebelum tidur'],
                         ['id' => 39, 'qty' => 30, 'price' => 600, 'dosage' => '500 mg', 'frequency' => '1x1 pagi', 'instructions' => 'Sesudah makan'],
                     ],
-                    'needs_lab' => false,
+                    'needs_lab' => $needsAncLab,
+                    'laboratory_id' => $labInfo['laboratory_id'],
+                    'lab_name' => $labInfo['lab_name'],
+                    'lab_price' => $labInfo['lab_price'],
+                    'lab_clinical_notes' => $labInfo['lab_clinical_notes'],
+                    'lab_result_val' => $labInfo['lab_result_val'],
+                    'lab_abnormal' => $labInfo['lab_abnormal'],
                     'consult_name' => 'Konsultasi & Pemeriksaan KIA / Bidan', 'consult_fee' => 35000,
                     'procedure_name' => 'Pemeriksaan Kehamilan (ANC Terpadu)', 'procedure_fee' => 50000,
                     'doc_fee' => 55000, 'nurse_fee' => 10000, 'clinic_fee' => 20000,
@@ -1385,17 +1824,19 @@ class GenerateStaticDatasetFiles extends Command
             }
         }
 
-        // Poli Umum Scenarios (5 Variasi Medis Utama)
+        // Poli Umum Scenarios (5 Variasi Medis Utama dengan Dukungan Pemeriksaan Laboratorium Luas)
         $uSeed = $seed % 5;
         if ($uSeed === 0) {
-            // ISPA / Common Cold
+            // ISPA / Common Cold & Febris
+            $needsLab = ($seed % 3 === 0);
+
             return [
                 'chief_complaint' => 'Batuk berdahak, pilek hidung tersumbat, dan badan meriang sejak 3 hari',
-                'present_illness' => 'Dahak warna putih kehijauan, tenggorokan terasa serak dan nyeri saat menelan',
+                'present_illness' => 'Dahak warna putih kekuningan, tenggorokan serak dan nyeri saat menelan',
                 'pain_scale' => 1, 'pain_location' => 'Tenggorokan',
-                'systolic' => 118, 'diastolic' => 78, 'temperature' => 37.5,
+                'systolic' => 118, 'diastolic' => 78, 'temperature' => $needsLab ? 38.4 : 37.5,
                 'subjective' => 'Pasien mengeluh batuk, hidung tersumbat, bersin-bersin, tenggorokan nyeri, dan demam sumer sejak 3 hari.',
-                'objective' => 'Faring hiperemis (+), tonsil T1/T1 tenang. Konka hidung hipertrofi hiperemis (+). Cor/Pulmo dalam batas normal.',
+                'objective' => 'Faring hiperemis (+), tonsil T1/T1 tenang. Konka hidung hipertrofi hiperemis (+). Cor/Pulmo vesikuler normal.',
                 'assessment' => 'Infeksi Saluran Pernapasan Akut / Common Cold (J06.9)',
                 'plan' => 'Simptomatis: antipiretik-analgesik, ekspektoran, antihistamin-dekongestan, multivitamin.',
                 'education' => 'Istirahat cukup, perbanyak minum air hangat minimal 2 liter/hari, gunakan masker bila keluar rumah.',
@@ -1408,13 +1849,25 @@ class GenerateStaticDatasetFiles extends Command
                     ['id' => 5, 'qty' => 10, 'price' => 500, 'dosage' => '10 mg', 'frequency' => '1x1 malam', 'instructions' => 'Meredakan pilek & alergi'],
                     ['id' => 7, 'qty' => 10, 'price' => 1000, 'dosage' => '500 mg', 'frequency' => '1x1 pagi', 'instructions' => 'Meningkatkan daya tahan tubuh'],
                 ],
-                'needs_lab' => false,
+                'needs_lab' => $needsLab,
+                'laboratory_id' => 1,
+                'lab_name' => 'Darah Lengkap (CBC)', 'lab_price' => 65000,
+                'lab_clinical_notes' => 'Evaluasi leukositosis dan tanda infeksi bakteri sekunder pada ISPA febris',
+                'lab_result_val' => 'Leu: 11.800 /uL, Hb: 13.5 g/dL, Plt: 245.000 /uL',
+                'lab_abnormal' => true,
                 'consult_name' => 'Konsultasi & Pemeriksaan Dokter Umum', 'consult_fee' => 40000,
                 'procedure_name' => '', 'procedure_fee' => 0,
                 'doc_fee' => 25000, 'nurse_fee' => 5000, 'clinic_fee' => 10000,
             ];
         } elseif ($uSeed === 1) {
             // Hipertensi Primer
+            $needsLab = ($seed % 2 === 0);
+            $labType = ($seed % 4 === 0) ? 'chol' : 'ua';
+            $labId = ($labType === 'chol') ? 3 : 4;
+            $labName = ($labType === 'chol') ? 'Kolesterol Total' : 'Asam Urat (Uric Acid)';
+            $labPrice = ($labType === 'chol') ? 35000 : 30000;
+            $labVal = ($labType === 'chol') ? 'Kolesterol: 232 mg/dL (Tinggi)' : 'Asam Urat: 7.8 mg/dL (Tinggi)';
+
             return [
                 'chief_complaint' => 'Kepala pusing berdenyut dan tengkuk terasa kaku tegang sejak kemarin',
                 'present_illness' => 'Pasien memiliki riwayat darah tinggi namun sering lupa minum obat',
@@ -1432,13 +1885,20 @@ class GenerateStaticDatasetFiles extends Command
                     ['id' => 4, 'qty' => 30, 'price' => 1000, 'dosage' => '5 mg', 'frequency' => '1x1 malam', 'instructions' => 'Diminum rutin tiap jam 20.00'],
                     ['id' => 1, 'qty' => 10, 'price' => 600, 'dosage' => '500 mg', 'frequency' => '3x1 sesudah makan', 'instructions' => 'Bila pusing berat'],
                 ],
-                'needs_lab' => false,
+                'needs_lab' => $needsLab,
+                'laboratory_id' => $labId,
+                'lab_name' => $labName, 'lab_price' => $labPrice,
+                'lab_clinical_notes' => 'Pemeriksaan profil metabolik dan lipid rutin pada pasien hipertensi',
+                'lab_result_val' => $labVal,
+                'lab_abnormal' => true,
                 'consult_name' => 'Konsultasi & Pemeriksaan Dokter Umum', 'consult_fee' => 40000,
                 'procedure_name' => '', 'procedure_fee' => 0,
                 'doc_fee' => 25000, 'nurse_fee' => 5000, 'clinic_fee' => 10000,
             ];
         } elseif ($uSeed === 2) {
             // Dispepsia / Gastritis Akut
+            $needsLab = ($seed % 4 === 0);
+
             return [
                 'chief_complaint' => 'Nyeri perih pada ulu hati, perut kembung begah, dan mual muntah',
                 'present_illness' => 'Nyeri memberat setelah terlambat makan dan minum kopi pekat',
@@ -1457,13 +1917,18 @@ class GenerateStaticDatasetFiles extends Command
                     ['id' => 6, 'qty' => 14, 'price' => 2000, 'dosage' => '20 mg', 'frequency' => '2x1 sebelum makan', 'instructions' => '30 menit sebelum sarapan & makan malam'],
                     ['id' => 30, 'qty' => 10, 'price' => 1000, 'dosage' => '10 mg', 'frequency' => '3x1 sebelum makan', 'instructions' => 'Meredakan mual'],
                 ],
-                'needs_lab' => false,
+                'needs_lab' => $needsLab,
+                'laboratory_id' => 5,
+                'lab_name' => 'Urin Rutin Lengkap', 'lab_price' => 40000,
+                'lab_clinical_notes' => 'Eksklusi infeksi saluran kemih pada nyeri abdomen bawah/epigastrium',
+                'lab_result_val' => 'Sedimen: Leukosit 1-2 /lpb, Bakteri (-)',
+                'lab_abnormal' => false,
                 'consult_name' => 'Konsultasi & Pemeriksaan Dokter Umum', 'consult_fee' => 40000,
                 'procedure_name' => '', 'procedure_fee' => 0,
                 'doc_fee' => 25000, 'nurse_fee' => 5000, 'clinic_fee' => 10000,
             ];
         } elseif ($uSeed === 3) {
-            // Diabetes Melitus Tipe 2 (Dengan Pemeriksaan Lab GDS)
+            // Diabetes Melitus Tipe 2 (100% order Lab GDS)
             return [
                 'chief_complaint' => 'Sering merasa haus, sering kencing malam hari lebih dari 4 kali, dan badan lemas',
                 'present_illness' => 'Berat badan turun 4 kg dalam 2 bulan terakhir tanpa program diet',
@@ -1483,16 +1948,23 @@ class GenerateStaticDatasetFiles extends Command
                 ],
                 'needs_lab' => true,
                 'laboratory_id' => 2,
-                'lab_name' => 'Pemeriksaan Gula Darah Sewaktu (GDS)', 'lab_price' => 25000,
-                'lab_clinical_notes' => 'Skrining & evaluasi kadar glukosa darah pada dugaan klinis DM',
-                'lab_parameter' => 'Glukosa Darah Sewaktu', 'lab_result_val' => '245 mg/dL',
-                'lab_range' => '< 140 mg/dL', 'lab_unit' => 'mg/dL', 'lab_abnormal' => true,
+                'lab_name' => 'Glukosa Darah Sewaktu (GDS)', 'lab_price' => 25000,
+                'lab_clinical_notes' => 'Skrining & evaluasi kadar glukosa darah sewaktu pada dugaan klinis DM',
+                'lab_result_val' => '245 mg/dL (Hiperglikemia)',
+                'lab_abnormal' => true,
                 'consult_name' => 'Konsultasi & Pemeriksaan Dokter Umum', 'consult_fee' => 40000,
                 'procedure_name' => '', 'procedure_fee' => 0,
                 'doc_fee' => 25000, 'nurse_fee' => 5000, 'clinic_fee' => 10000,
             ];
         } else {
-            // Gastroenteritis Akut / Diare
+            // Gastroenteritis Akut / Suspek Demam Tifoid
+            $needsLab = ($seed % 3 !== 2); // 66% order lab
+            $isWidal = ($seed % 2 === 0);
+            $labId = $isWidal ? 6 : 5;
+            $labName = $isWidal ? 'Uji Widal (Tifoid)' : 'Urin Rutin Lengkap';
+            $labPrice = $isWidal ? 45000 : 40000;
+            $labVal = $isWidal ? 'Titer S. typhi O: 1/320 (Positif)' : 'Bj: 1.025, Leukosit 2-3 /lpb';
+
             return [
                 'chief_complaint' => 'Buang air besar cair lebih dari 5 kali sejak tadi malam disertai kram perut',
                 'present_illness' => 'Tinja cair tidak berdarah, ada lendir sedikit, muntah 1 kali setelah makan jajanan pedas',
@@ -1511,7 +1983,12 @@ class GenerateStaticDatasetFiles extends Command
                     ['id' => 28, 'qty' => 6, 'price' => 600, 'dosage' => '2 mg', 'frequency' => 'Bila diare berlanjut', 'instructions' => 'Maksimal 4 tablet/hari'],
                     ['id' => 1, 'qty' => 10, 'price' => 600, 'dosage' => '500 mg', 'frequency' => '3x1 sesudah makan', 'instructions' => 'Bila demam / kram'],
                 ],
-                'needs_lab' => false,
+                'needs_lab' => $needsLab,
+                'laboratory_id' => $labId,
+                'lab_name' => $labName, 'lab_price' => $labPrice,
+                'lab_clinical_notes' => 'Skrining etiologi diare akut & evaluasi kemungkinan demam enterik tifoid',
+                'lab_result_val' => $labVal,
+                'lab_abnormal' => $isWidal,
                 'consult_name' => 'Konsultasi & Pemeriksaan Dokter Umum', 'consult_fee' => 40000,
                 'procedure_name' => '', 'procedure_fee' => 0,
                 'doc_fee' => 25000, 'nurse_fee' => 5000, 'clinic_fee' => 10000,
