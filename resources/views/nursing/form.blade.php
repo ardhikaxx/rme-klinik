@@ -1,23 +1,21 @@
 @extends('layouts.app')
 
 @section('title', 'Form Pengkajian Awal Keperawatan - ' . $visit->patient->name)
+@section('page_title', 'Form Pengkajian Awal & Triase')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('nursing.index') }}">Pengkajian Perawat</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Asesmen {{ $visit->visit_number }}</li>
+@endsection
+
+@section('page_actions')
+    <a href="{{ route('nursing.index') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Kembali ke Antrean
+    </a>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Pengkajian Awal & Triase Pasien</h4>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('nursing.index') }}">Pengkajian Perawat</a></li>
-                    <li class="breadcrumb-item active">Entri Data Pengkajian</li>
-                </ol>
-            </nav>
-        </div>
-        <a href="{{ route('nursing.index') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Kembali ke Antrean
-        </a>
+<div class="container-fluid p-0">
     </div>
 
     <!-- Patient Header Card -->
