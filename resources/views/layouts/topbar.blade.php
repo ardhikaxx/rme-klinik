@@ -10,6 +10,21 @@
         </div>
     </div>
 
+    {{-- Official Government & Healthcare Platform Badges --}}
+    <div class="topbar-official-badges d-none d-md-flex align-items-center" title="Standar Pelayanan Terintegrasi Resmi">
+        <div class="official-badge-item" title="Kementerian Kesehatan Republik Indonesia">
+            <img src="{{ asset('images/logo-kemenkes.webp') }}" alt="Logo Kemenkes RI" class="official-logo-img kemenkes-logo">
+        </div>
+        <span class="official-badge-divider"></span>
+        <div class="official-badge-item" title="Terintegrasi Platform SATUSEHAT Kemenkes RI">
+            <img src="{{ asset('images/logo-satusehat.webp') }}" alt="Logo SATUSEHAT" class="official-logo-img satusehat-logo">
+        </div>
+        <span class="official-badge-divider"></span>
+        <div class="official-badge-item" title="Badan Penyelenggara Jaminan Sosial Kesehatan (BPJS Kesehatan)">
+            <img src="{{ asset('images/logo-bpjs-kesehatan.webp') }}" alt="Logo BPJS Kesehatan" class="official-logo-img bpjs-logo">
+        </div>
+    </div>
+
     <div class="d-flex align-items-center gap-2 gap-md-3">
         {{-- User dropdown --}}
         <div class="dropdown">
