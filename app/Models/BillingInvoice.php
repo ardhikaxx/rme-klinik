@@ -90,6 +90,11 @@ class BillingInvoice extends Model
         };
     }
 
+    public function getBalanceDueAttribute(): float
+    {
+        return (float) ($this->balance_amount ?? 0);
+    }
+
     public static function generateNextInvoiceNumber(): string
     {
         $today = date('Ymd');
