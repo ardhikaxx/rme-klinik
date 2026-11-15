@@ -22,7 +22,8 @@ class MedicalDocumentController extends Controller
         $type = $request->query('type');
 
         $query = MedicalDocument::with(['patient', 'doctor', 'visit.polyclinic'])
-            ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc');
 
         if ($type) {
             $query->where('type', $type);
