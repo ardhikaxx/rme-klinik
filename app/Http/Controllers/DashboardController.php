@@ -69,8 +69,8 @@ class DashboardController extends Controller
         // 2. Dashboard Petugas Admisi & Kasir
         if ($user->hasRole('admisi_kasir')) {
             $visitsToday = Visit::with(['patient', 'polyclinic', 'doctor'])
-                ->whereDate('registration_date', $today)
-                ->orderBy('registration_date', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
                 ->limit(10)
                 ->get();
 
@@ -78,6 +78,7 @@ class DashboardController extends Controller
             $pendingPayments = BillingInvoice::with(['patient', 'visit'])
                 ->whereIn('status', ['belum_dibayar', 'pembayaran_sebagian'])
                 ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
                 ->limit(8)
                 ->get();
 
@@ -89,15 +90,15 @@ class DashboardController extends Controller
         // 3. Dashboard Perawat / Bidan
         if ($user->hasRole('perawat_bidan')) {
             $waitingAssessment = Visit::with(['patient.allergies', 'polyclinic', 'doctor'])
-                ->whereDate('registration_date', $today)
-                ->whereIn('status', ['menunggu_pemeriksaan_awal', 'terdaftar'])
-                ->orderBy('registration_date', 'asc')
+                ->whereIn('status', ['menunggu_pemeriksaan_awal', 'terdaftar', 'pemeriksaan_awal_berlangsung'])
+                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
                 ->get();
 
             $completedAssessment = Visit::with(['patient', 'polyclinic'])
-                ->whereDate('registration_date', $today)
                 ->whereHas('nursingAssessment')
-                ->orderBy('updated_at', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
                 ->limit(8)
                 ->get();
 
@@ -109,17 +110,17 @@ class DashboardController extends Controller
             $empId = $user->employee?->id;
 
             $readyForExam = Visit::with(['patient.allergies', 'polyclinic', 'nursingAssessment'])
-                ->whereDate('registration_date', $today)
                 ->when($empId, fn ($q) => $q->where('doctor_id', $empId))
                 ->whereIn('status', ['menunggu_dokter', 'pemeriksaan_dokter_berlangsung'])
-                ->orderBy('registration_date', 'asc')
+                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
                 ->get();
 
             $finishedExam = Visit::with(['patient', 'polyclinic', 'medicalRecord.diagnoses'])
-                ->whereDate('registration_date', $today)
                 ->when($empId, fn ($q) => $q->where('doctor_id', $empId))
                 ->whereIn('status', ['menunggu_farmasi', 'menunggu_pembayaran', 'selesai'])
-                ->orderBy('updated_at', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
                 ->limit(8)
                 ->get();
 
@@ -130,7 +131,8 @@ class DashboardController extends Controller
         if ($user->hasRole('farmasi')) {
             $pendingPrescriptions = Prescription::with(['visit.patient', 'doctor', 'items.medicine'])
                 ->whereIn('status', ['menunggu_verifikasi', 'diverifikasi', 'disiapkan'])
-                ->orderBy('prescription_date', 'asc')
+                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
                 ->get();
 
             $lowStockMedicines = Medicine::all()->filter(fn ($m) => $m->isLowStock());
