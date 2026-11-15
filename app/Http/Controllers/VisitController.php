@@ -23,7 +23,7 @@ class VisitController extends Controller
             $filters['date'] = Carbon::today()->toDateString();
         }
 
-        $visits = $this->visitService->getVisits($filters, 15);
+        $visits = $this->visitService->getVisits($filters, $this->perPage($request));
         $polyclinics = Polyclinic::where('is_active', true)->get();
         $doctors = Employee::where('profession', 'dokter')->where('is_active', true)->get();
 
