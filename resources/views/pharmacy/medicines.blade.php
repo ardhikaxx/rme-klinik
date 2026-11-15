@@ -1,18 +1,21 @@
 @extends('layouts.app')
 
 @section('title', 'Katalog Obat & Master Farmasi')
+@section('page_title', 'Master Obat & Manajemen Persediaan Farmasi')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('pharmacy.prescriptions') }}">Farmasi</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Katalog & Stok Obat</li>
+@endsection
+
+@section('page_actions')
+    <button type="button" class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addMedicineModal">
+        <i class="fas fa-plus me-1"></i> Tambah Obat Baru
+    </button>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Master Obat & Manajemen Persediaan Farmasi</h4>
-            <p class="text-muted small mb-0">Katalog obat, sediaan farmasi, batas minimum stok, dan harga jual</p>
-        </div>
-        <button type="button" class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addMedicineModal">
-            <i class="fas fa-plus me-1"></i> Tambah Obat Baru
-        </button>
-    </div>
+<div class="container-fluid p-0">
 
     <!-- Search & Filter Card -->
     <div class="card border-0 shadow-sm mb-4">
