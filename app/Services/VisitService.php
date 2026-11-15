@@ -26,9 +26,6 @@ class VisitService
 
         if (! empty($filters['date'])) {
             $query->whereDate('registration_date', $filters['date']);
-        } else {
-            // Default to today if no date filter provided
-            $query->whereDate('registration_date', Carbon::today());
         }
 
         if (! empty($filters['polyclinic_id'])) {
@@ -59,7 +56,7 @@ class VisitService
             });
         }
 
-        return $query->orderBy('registration_date', 'desc')->paginate($perPage);
+        return $query->orderBy('created_at', 'desc')->orderBy('id', 'desc')->paginate($perPage);
     }
 
     /**
