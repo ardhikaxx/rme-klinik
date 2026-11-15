@@ -1,9 +1,15 @@
 @extends('layouts.app')
 
 @section('title', 'Pemeriksaan Laboratorium - ' . $request->request_number)
+@section('page_title', 'Pengujian Laboratorium & Hasil Uji')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('laboratory.index') }}">Laboratorium</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Hasil Lab {{ $request->request_number }}</li>
+@endsection
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid p-0">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>
             <div class="d-flex align-items-center gap-2">
