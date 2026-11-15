@@ -254,6 +254,10 @@ test('role dashboards render correctly without errors', function () {
     $resp = $this->actingAs($this->userKepala)->get(route('dashboard'))->assertOk();
     $resp->assertSee('images/logo-white.png');
     $resp->assertSee('images/logo-icon-white.png');
+    $resp->assertSee('images/logo-kemenkes.webp');
+    $resp->assertSee('images/logo-satusehat.webp');
+    $resp->assertSee('images/logo-bpjs-kesehatan.webp');
+    $resp->assertSee('favicon.png');
 
     // 2. Admisi Dashboard
     $this->actingAs($this->userAdmisi)->get(route('dashboard'))->assertOk();
