@@ -28,7 +28,7 @@ class MedicalDocumentController extends Controller
             $query->where('type', $type);
         }
 
-        $documents = $query->paginate(15);
+        $documents = $query->paginate($this->perPage($request));
 
         return view('documents.index', compact('documents', 'type'));
     }
