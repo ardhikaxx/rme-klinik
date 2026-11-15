@@ -1,23 +1,22 @@
 @extends('layouts.app')
 
 @section('title', 'Pembuatan Resep Elektronik - ' . $visit->patient->name)
+@section('page_title', 'Pembuatan Resep Elektronik (E-Prescription)')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('pharmacy.prescriptions') }}">Farmasi</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('clinical.examination', $visit->id) }}">Pemeriksaan</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Buat Resep Baru</li>
+@endsection
+
+@section('page_actions')
+    <a href="{{ route('clinical.examination', $visit->id) }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Kembali ke Pemeriksaan
+    </a>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Pembuatan Resep Elektronik (E-Prescription)</h4>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('clinical.examination', $visit->id) }}">Pemeriksaan</a></li>
-                    <li class="breadcrumb-item active">Buat Resep Baru</li>
-                </ol>
-            </nav>
-        </div>
-        <a href="{{ route('clinical.examination', $visit->id) }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Kembali ke Pemeriksaan
-        </a>
+<div class="container-fluid p-0">
     </div>
 
     <!-- Patient Header Card -->
