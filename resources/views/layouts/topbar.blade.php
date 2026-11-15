@@ -1,39 +1,67 @@
 <header class="topbar">
     <div class="d-flex align-items-center gap-3">
         <button type="button" class="nav-toggle-btn" title="Toggle Navigasi">
-            <i class="fa-solid fa-bars"></i>
+            <i class="fa-solid fa-bars-staggered"></i>
         </button>
-        <div>
-            <span class="fw-bold text-dark d-none d-md-inline">Klinik Pratama Sehat Mandiri</span>
-            <span class="badge bg-light text-secondary border ms-2 d-none d-lg-inline">
-                <i class="fa-regular fa-clock me-1 text-primary"></i>
-                {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }} &bull; WIB
+        <div class="d-flex align-items-center gap-2">
+            <span class="fw-bold text-dark fs-6 d-none d-md-inline" style="letter-spacing: -0.01em;">
+                Klinik Pratama Sehat Mandiri
+            </span>
+            <span class="badge topbar-badge d-none d-lg-inline-flex align-items-center gap-1">
+                <i class="fa-regular fa-calendar-check text-info"></i>
+                {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
+            </span>
+            <span class="badge topbar-status-badge d-none d-xl-inline-flex align-items-center gap-1">
+                <span class="status-pulse-green"></span>
+                <span>Sistem Siap</span>
             </span>
         </div>
     </div>
 
-    <div class="d-flex align-items-center gap-3">
+    <div class="d-flex align-items-center gap-2 gap-md-3">
+        {{-- Fast Shortcut Buttons based on permissions --}}
+        @if(auth()->user()->hasAnyRole(['admisi_kasir', 'kepala_klinik']))
+            <a href="{{ route('patients.create') }}" class="btn btn-sm btn-outline-info rounded-pill px-3 d-none d-sm-inline-flex align-items-center gap-1" style="font-size: 0.82rem; font-weight: 500;">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>Pasien Baru</span>
+            </a>
+            <a href="{{ route('visits.create') }}" class="btn btn-sm btn-rme-primary rounded-pill px-3 d-none d-md-inline-flex align-items-center gap-1" style="font-size: 0.82rem; font-weight: 500;">
+                <i class="fa-solid fa-plus"></i>
+                <span>Registrasi</span>
+            </a>
+        @elseif(auth()->user()->hasRole('dokter'))
+            <a href="{{ route('clinical.index') }}" class="btn btn-sm btn-rme-primary rounded-pill px-3 d-none d-sm-inline-flex align-items-center gap-1" style="font-size: 0.82rem; font-weight: 500;">
+                <i class="fa-solid fa-stethoscope"></i>
+                <span>Antrean Periksa</span>
+            </a>
+        @elseif(auth()->user()->hasRole('perawat_bidan'))
+            <a href="{{ route('nursing.index') }}" class="btn btn-sm btn-rme-primary rounded-pill px-3 d-none d-sm-inline-flex align-items-center gap-1" style="font-size: 0.82rem; font-weight: 500;">
+                <i class="fa-solid fa-user-nurse"></i>
+                <span>Antrean Triage</span>
+            </a>
+        @endif
+
         {{-- User dropdown --}}
         <div class="dropdown">
-            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle user-pill" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                 <div class="user-avatar me-2">
                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                 </div>
                 <div class="d-none d-md-block text-start me-1">
-                    <div class="fw-bold fs-6 lh-1">{{ auth()->user()->name }}</div>
-                    <small class="text-muted" style="font-size: 0.75rem;">
+                    <div class="fw-bold fs-6 lh-1 text-dark">{{ auth()->user()->name }}</div>
+                    <small class="text-muted" style="font-size: 0.74rem;">
                         {{ auth()->user()->primary_role_name }}
                     </small>
                 </div>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="userMenuDropdown" style="min-width: 220px; border-radius: 10px;">
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2" aria-labelledby="userMenuDropdown" style="min-width: 240px; border-radius: 14px; padding: 0.5rem;">
                 <li class="px-3 py-2 border-bottom">
-                    <div class="fw-bold">{{ auth()->user()->name }}</div>
+                    <div class="fw-bold text-dark">{{ auth()->user()->name }}</div>
                     <div class="text-muted small">&#64;{{ auth()->user()->username }}</div>
-                    <span class="badge bg-info text-dark mt-1">{{ auth()->user()->primary_role_name }}</span>
+                    <span class="badge bg-info text-dark mt-1" style="font-size: 0.75rem;">{{ auth()->user()->primary_role_name }}</span>
                 </li>
                 <li>
-                    <button type="button" class="dropdown-item py-2" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                    <button type="button" class="dropdown-item py-2 rounded-2 mt-1" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
                         <i class="fa-solid fa-key text-muted me-2"></i> Ganti Password
                     </button>
                 </li>
@@ -41,7 +69,7 @@
                 <li>
                     <form method="POST" action="{{ route('logout') }}" id="logoutForm">
                         @csrf
-                        <button type="button" class="dropdown-item py-2 text-danger" onclick="confirmAction({title: 'Konfirmasi Keluar', text: 'Apakah Anda yakin ingin keluar dari sistem?', confirmButtonText: 'Ya, Keluar', onConfirm: () => document.getElementById('logoutForm').submit()})">
+                        <button type="button" class="dropdown-item py-2 rounded-2 text-danger" onclick="confirmAction({title: 'Konfirmasi Keluar', text: 'Apakah Anda yakin ingin keluar dari sistem?', confirmButtonText: 'Ya, Keluar', onConfirm: () => document.getElementById('logoutForm').submit()})">
                             <i class="fa-solid fa-right-from-bracket me-2"></i> Keluar
                         </button>
                     </form>
