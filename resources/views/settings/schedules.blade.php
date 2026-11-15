@@ -20,7 +20,7 @@
             <h5 class="card-title mb-0 fw-bold text-primary">
                 <i class="fas fa-calendar-alt me-2"></i>Daftar Jadwal Praktik Dokter
             </h5>
-            <span class="small text-muted">{{ $schedules->count() }} jadwal terdaftar</span>
+            <span class="small text-muted">{{ number_format($schedules->total(), 0, ',', '.') }} jadwal terdaftar</span>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -90,6 +90,9 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+        <div class="card-footer bg-white border-top py-3">
+            <x-table-footer :paginator="$schedules" label="jadwal praktik" />
         </div>
     </div>
 </div>
