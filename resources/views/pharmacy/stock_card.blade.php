@@ -1,23 +1,21 @@
 @extends('layouts.app')
 
 @section('title', 'Kartu Stok Obat - ' . $medicine->brand_name)
+@section('page_title', 'Kartu Stok Obat (Stock Movement Card)')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('pharmacy.medicines') }}">Katalog Obat</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ $medicine->brand_name }}</li>
+@endsection
+
+@section('page_actions')
+    <a href="{{ route('pharmacy.medicines') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Kembali ke Katalog
+    </a>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Kartu Stok Obat (Stock Movement Card)</h4>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('pharmacy.medicines') }}">Katalog Obat</a></li>
-                    <li class="breadcrumb-item active">{{ $medicine->brand_name }}</li>
-                </ol>
-            </nav>
-        </div>
-        <a href="{{ route('pharmacy.medicines') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Kembali ke Katalog
-        </a>
+<div class="container-fluid p-0">
     </div>
 
     <!-- Medicine Header Card -->
