@@ -27,7 +27,8 @@ class PharmacyController extends Controller
         $status = $request->query('status');
 
         $query = Prescription::with(['visit.patient.allergies', 'doctor', 'items.medicine', 'compounds.items.medicine'])
-            ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc');
 
         if ($status) {
             $query->where('status', $status);
@@ -113,6 +114,8 @@ class PharmacyController extends Controller
                     ->orWhere('generic_name', 'like', "%{$search}%")
                     ->orWhere('code', 'like', "%{$search}%");
             })
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
             ->paginate($this->perPage($request));
 
         $categories = MedicineCategory::all();
@@ -168,6 +171,7 @@ class PharmacyController extends Controller
         $movements = MedicineStockMovement::with(['batch', 'creator'])
             ->where('medicine_id', $medicine->id)
             ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
             ->paginate($this->perPage($request));
 
         return view('pharmacy.stock_card', compact('medicine', 'movements'));
@@ -177,6 +181,7 @@ class PharmacyController extends Controller
     {
         $receipts = MedicineReceipt::with(['supplier', 'receiver', 'items.medicine'])
             ->orderBy('received_date', 'desc')
+            ->orderBy('id', 'desc')
             ->paginate($this->perPage($request));
 
         $suppliers = Supplier::where('is_active', true)->get();
@@ -210,6 +215,7 @@ class PharmacyController extends Controller
     {
         $opnames = MedicineStockOpname::with(['conductor', 'approver', 'items.medicine', 'items.batch'])
             ->orderBy('opname_date', 'desc')
+            ->orderBy('id', 'desc')
             ->paginate($this->perPage($request));
 
         $medicines = Medicine::with('batches')->get();
