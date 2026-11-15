@@ -1,18 +1,20 @@
 @extends('layouts.app')
 
 @section('title', 'Daftar Permintaan Pemeriksaan Laboratorium')
+@section('page_title', 'Instalasi Laboratorium Medis')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item active" aria-current="page">Pemeriksaan Laboratorium</li>
+@endsection
+
+@section('page_actions')
+    <div class="text-muted small">
+        <i class="fas fa-flask me-1 text-primary"></i> Laboratorium Klinik Terintegrasi
+    </div>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Instalasi Laboratorium Medis</h4>
-            <p class="text-muted small mb-0">Pengambilan spesimen, entri hasil pengujian, deteksi nilai kritis, dan verifikasi analis</p>
-        </div>
-        <div class="text-muted small">
-            <i class="fas fa-flask me-1 text-primary"></i> Laboratorium Klinik Terintegrasi
-        </div>
-    </div>
+<div class="container-fluid p-0">
 
     <!-- Status Tabs -->
     <div class="card border-0 shadow-sm mb-4">
