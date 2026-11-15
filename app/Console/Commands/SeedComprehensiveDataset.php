@@ -620,6 +620,49 @@ class SeedComprehensiveDataset extends Command
         $this->line('');
         $this->comment("3. Membangun {$targetVisits} Kunjungan Operasional & Seluruh Modul Terkait (2020 - 2026)...");
 
+        // Truncate operational tables to ensure clean starting IDs from 1 without primary key collisions
+        $opsTables = [
+            'visit_status_histories',
+            'vital_signs',
+            'nursing_assessments',
+            'medical_record_diagnoses',
+            'medical_record_procedures',
+            'medical_record_addendums',
+            'medical_records',
+            'odontogram_teeth',
+            'odontograms',
+            'antenatal_cares',
+            'child_growths',
+            'prescription_compound_items',
+            'prescription_compounds',
+            'prescription_items',
+            'prescriptions',
+            'dispensing_items',
+            'dispensing_transactions',
+            'laboratory_results',
+            'laboratory_request_items',
+            'laboratory_requests',
+            'refunds',
+            'payments',
+            'medical_fee_transactions',
+            'billing_items',
+            'billing_invoices',
+            'medical_documents',
+            'patient_documents',
+            'audit_logs',
+            'fhir_sync_logs',
+            'fhir_mappings',
+            'visits',
+        ];
+        foreach ($opsTables as $ot) {
+            DB::table($ot)->truncate();
+        }
+
+        // Clean out dispensing movements, reset batch current_stock to initial 50000
+        DB::table('medicine_stock_movements')->where('movement_type', '!=', 'receipt')->delete();
+        DB::table('medicine_batches')->update(['current_stock' => 50000]);
+        $this->loadBatchesIntoMemory();
+
         $bar = $this->output->createProgressBar($targetVisits);
         $bar->start();
 
@@ -1477,126 +1520,52 @@ class SeedComprehensiveDataset extends Command
         array &$invoices, array &$billingItems, array &$payments, array &$refunds, array &$fees,
         array &$documents, array &$patientDocs, array &$auditLogs, array &$fhir
     ): void {
-        if (! empty($visits)) {
-            DB::table('visits')->insert($visits);
-            $visits = [];
+        $this->safeInsert('visits', $visits);
+        $this->safeInsert('visit_status_histories', $histories);
+        $this->safeInsert('nursing_assessments', $assessments);
+        $this->safeInsert('vital_signs', $vitals);
+        $this->safeInsert('medical_records', $medicalRecords);
+        $this->safeInsert('medical_record_diagnoses', $diagnoses);
+        $this->safeInsert('medical_record_procedures', $procedures);
+        $this->safeInsert('odontograms', $odontograms);
+        $this->safeInsert('odontogram_teeth', $odontogramTeeth);
+        $this->safeInsert('antenatal_cares', $antenatal);
+        $this->safeInsert('child_growths', $childGrowth);
+        $this->safeInsert('prescriptions', $prescriptions);
+        $this->safeInsert('prescription_items', $prescriptionItems);
+        $this->safeInsert('prescription_compounds', $compounds);
+        $this->safeInsert('prescription_compound_items', $compoundItems);
+        $this->safeInsert('dispensing_transactions', $dispensing);
+        $this->safeInsert('dispensing_items', $dispensingItems);
+        $this->safeInsert('medicine_stock_movements', $movements);
+        $this->safeInsert('laboratory_requests', $labRequests);
+        $this->safeInsert('laboratory_request_items', $labItems);
+        $this->safeInsert('laboratory_results', $labResults);
+        $this->safeInsert('billing_invoices', $invoices);
+        $this->safeInsert('billing_items', $billingItems);
+        $this->safeInsert('payments', $payments);
+        $this->safeInsert('refunds', $refunds);
+        $this->safeInsert('medical_fee_transactions', $fees);
+        $this->safeInsert('medical_documents', $documents);
+        $this->safeInsert('patient_documents', $patientDocs);
+        $this->safeInsert('audit_logs', $auditLogs);
+        $this->safeInsert('fhir_mappings', $fhir);
+    }
+
+    /**
+     * Safely insert data in smaller batches (up to 500 records) to stay well below MySQL's 65,535 placeholder limit.
+     */
+    protected function safeInsert(string $table, array &$data, int $batchSize = 500): void
+    {
+        if (empty($data)) {
+            return;
         }
-        if (! empty($histories)) {
-            DB::table('visit_status_histories')->insert($histories);
-            $histories = [];
+
+        foreach (array_chunk($data, $batchSize) as $chunk) {
+            DB::table($table)->insert($chunk);
         }
-        if (! empty($assessments)) {
-            DB::table('nursing_assessments')->insert($assessments);
-            $assessments = [];
-        }
-        if (! empty($vitals)) {
-            DB::table('vital_signs')->insert($vitals);
-            $vitals = [];
-        }
-        if (! empty($medicalRecords)) {
-            DB::table('medical_records')->insert($medicalRecords);
-            $medicalRecords = [];
-        }
-        if (! empty($diagnoses)) {
-            DB::table('medical_record_diagnoses')->insert($diagnoses);
-            $diagnoses = [];
-        }
-        if (! empty($procedures)) {
-            DB::table('medical_record_procedures')->insert($procedures);
-            $procedures = [];
-        }
-        if (! empty($odontograms)) {
-            DB::table('odontograms')->insert($odontograms);
-            $odontograms = [];
-        }
-        if (! empty($odontogramTeeth)) {
-            DB::table('odontogram_teeth')->insert($odontogramTeeth);
-            $odontogramTeeth = [];
-        }
-        if (! empty($antenatal)) {
-            DB::table('antenatal_cares')->insert($antenatal);
-            $antenatal = [];
-        }
-        if (! empty($childGrowth)) {
-            DB::table('child_growths')->insert($childGrowth);
-            $childGrowth = [];
-        }
-        if (! empty($prescriptions)) {
-            DB::table('prescriptions')->insert($prescriptions);
-            $prescriptions = [];
-        }
-        if (! empty($prescriptionItems)) {
-            DB::table('prescription_items')->insert($prescriptionItems);
-            $prescriptionItems = [];
-        }
-        if (! empty($compounds)) {
-            DB::table('prescription_compounds')->insert($compounds);
-            $compounds = [];
-        }
-        if (! empty($compoundItems)) {
-            DB::table('prescription_compound_items')->insert($compoundItems);
-            $compoundItems = [];
-        }
-        if (! empty($dispensing)) {
-            DB::table('dispensing_transactions')->insert($dispensing);
-            $dispensing = [];
-        }
-        if (! empty($dispensingItems)) {
-            DB::table('dispensing_items')->insert($dispensingItems);
-            $dispensingItems = [];
-        }
-        if (! empty($movements)) {
-            DB::table('medicine_stock_movements')->insert($movements);
-            $movements = [];
-        }
-        if (! empty($labRequests)) {
-            DB::table('laboratory_requests')->insert($labRequests);
-            $labRequests = [];
-        }
-        if (! empty($labItems)) {
-            DB::table('laboratory_request_items')->insert($labItems);
-            $labItems = [];
-        }
-        if (! empty($labResults)) {
-            DB::table('laboratory_results')->insert($labResults);
-            $labResults = [];
-        }
-        if (! empty($invoices)) {
-            DB::table('billing_invoices')->insert($invoices);
-            $invoices = [];
-        }
-        if (! empty($billingItems)) {
-            DB::table('billing_items')->insert($billingItems);
-            $billingItems = [];
-        }
-        if (! empty($payments)) {
-            DB::table('payments')->insert($payments);
-            $payments = [];
-        }
-        if (! empty($refunds)) {
-            DB::table('refunds')->insert($refunds);
-            $refunds = [];
-        }
-        if (! empty($fees)) {
-            DB::table('medical_fee_transactions')->insert($fees);
-            $fees = [];
-        }
-        if (! empty($documents)) {
-            DB::table('medical_documents')->insert($documents);
-            $documents = [];
-        }
-        if (! empty($patientDocs)) {
-            DB::table('patient_documents')->insert($patientDocs);
-            $patientDocs = [];
-        }
-        if (! empty($auditLogs)) {
-            DB::table('audit_logs')->insert($auditLogs);
-            $auditLogs = [];
-        }
-        if (! empty($fhir)) {
-            DB::table('fhir_mappings')->insert($fhir);
-            $fhir = [];
-        }
+
+        $data = [];
     }
 
     /**
