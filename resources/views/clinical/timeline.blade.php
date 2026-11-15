@@ -1,23 +1,22 @@
 @extends('layouts.app')
 
 @section('title', 'Kronologis Rekam Medis (EMR Timeline) - ' . $visit->patient->name)
+@section('page_title', 'Kronologis Rekam Medis (EMR Timeline)')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('clinical.index') }}">Pemeriksaan Dokter</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('patients.show', $visit->patient_id) }}">{{ $visit->patient->name }}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Riwayat Klinis</li>
+@endsection
+
+@section('page_actions')
+    <a href="{{ route('clinical.examination', $visit->id) }}" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left me-1"></i> Kembali ke Pemeriksaan
+    </a>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Kronologis Rekam Medis Pasien (EMR Timeline)</h4>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('patients.show', $visit->patient_id) }}">{{ $visit->patient->name }}</a></li>
-                    <li class="breadcrumb-item active">Riwayat Klinis Longitudinal</li>
-                </ol>
-            </nav>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('clinical.examination', $visit->id) }}" class="btn btn-outline-primary">
-                <i class="fas fa-arrow-left me-1"></i> Kembali ke Pemeriksaan
+<div class="container-fluid p-0">
             </a>
             <button type="button" class="btn btn-outline-secondary" onclick="window.print()">
                 <i class="fas fa-print me-1"></i> Cetak Riwayat
