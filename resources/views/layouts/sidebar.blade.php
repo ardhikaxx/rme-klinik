@@ -1,8 +1,13 @@
 <aside id="sidebar-wrapper">
     <div class="sidebar-brand">
         <a href="{{ route('dashboard') }}">
-            <i class="fa-solid fa-hospital text-info"></i>
-            <span class="brand-text">RME KLINIK</span>
+            <div class="brand-icon-box">
+                <i class="fa-solid fa-hospital-user"></i>
+            </div>
+            <div class="brand-text-container">
+                <span class="brand-title">RME KLINIK</span>
+                <span class="brand-subtitle">Sistem Terpadu</span>
+            </div>
         </a>
     </div>
 
@@ -195,6 +200,26 @@
                 </li>
             </ul>
         @endif
+    </div>
+
+    {{-- Floating Sidebar Footer User Status --}}
+    <div class="sidebar-footer">
+        <div class="sidebar-user-card">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2 overflow-hidden">
+                    <div class="user-avatar-sm">
+                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                    </div>
+                    <div class="user-info-text text-truncate">
+                        <div class="user-name fw-bold text-white small text-truncate" style="line-height: 1.2;">{{ auth()->user()->name }}</div>
+                        <div class="user-role-badge">
+                            <span class="status-pulse-dot"></span>
+                            <span class="text-truncate">{{ auth()->user()->primary_role_name }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </aside>
 <div class="sidebar-backdrop"></div>
