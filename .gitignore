@@ -25,3 +25,7 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Pre-generated massive CSV datasets (regenerated via php artisan clinic:generate-dataset-files)
+/database/seeders/datasets/*.csv
+!/database/seeders/datasets/README.md
