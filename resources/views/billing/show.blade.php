@@ -1,9 +1,15 @@
 @extends('layouts.app')
 
 @section('title', 'Kasir & Rincian Tagihan - ' . $invoice->invoice_number)
+@section('page_title', 'Kasir & Rincian Tagihan Pasien')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('billing.index') }}">Kasir & Billing</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Faktur {{ $invoice->invoice_number }}</li>
+@endsection
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid p-0">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>
             <div class="d-flex align-items-center gap-2">
