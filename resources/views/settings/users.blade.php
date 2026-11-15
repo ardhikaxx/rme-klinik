@@ -1,18 +1,20 @@
 @extends('layouts.app')
 
 @section('title', 'Manajemen Pengguna & Pegawai Klinik')
+@section('page_title', 'Manajemen Akun Pengguna & Pegawai')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item active" aria-current="page">Pengguna & Pegawai</li>
+@endsection
+
+@section('page_actions')
+    <button type="button" class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addUserModal">
+        <i class="fas fa-user-plus me-1"></i> Tambah Pengguna Baru
+    </button>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Manajemen Akun Pengguna & Pegawai Klinik</h4>
-            <p class="text-muted small mb-0">Pengaturan kredensial login, penugasan hak akses role (RBAC), nomor SIP/STR tenaga medis</p>
-        </div>
-        <button type="button" class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addUserModal">
-            <i class="fas fa-user-plus me-1"></i> Tambah Pengguna Baru
-        </button>
-    </div>
+<div class="container-fluid p-0">
 
     <!-- Users Table -->
     <div class="card border-0 shadow-sm">
