@@ -258,6 +258,13 @@ test('role dashboards render correctly without errors', function () {
     $resp->assertSee('images/logo-satusehat.webp');
     $resp->assertSee('images/logo-bpjs-kesehatan.webp');
     $resp->assertSee('favicon.png');
+    $resp->assertSee('Tren Kunjungan Pasien 7 Hari Terakhir');
+    $resp->assertSee('id="visitsTrendChart"', false);
+    $resp->assertSee('id="btnChartBar"', false);
+    $resp->assertSee('id="btnChartLine"', false);
+    $resp->assertSee('Total 7 Hari');
+    $resp->assertSee('Rata-rata Harian');
+    $resp->assertSee('Tertinggi');
 
     // 2. Admisi Dashboard
     $this->actingAs($this->userAdmisi)->get(route('dashboard'))->assertOk();
