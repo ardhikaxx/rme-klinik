@@ -44,6 +44,11 @@ class Payment extends Model
         return $this->belongsTo(User::class, 'cashier_id');
     }
 
+    public function getChangeAmountAttribute(): float
+    {
+        return (float) ($this->change_due ?? 0);
+    }
+
     public static function generateNextReceiptNumber(): string
     {
         $today = date('Ymd');
