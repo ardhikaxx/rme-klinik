@@ -1,6 +1,12 @@
 @extends('layouts.app')
 
 @section('title', 'Detail Kunjungan - ' . $visit->visit_number)
+@section('page_title', 'Detail Pelayanan Kunjungan')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('visits.index') }}">Kunjungan</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ $visit->visit_number }}</li>
+@endsection
 
 @section('content')
 <div class="container-fluid">
