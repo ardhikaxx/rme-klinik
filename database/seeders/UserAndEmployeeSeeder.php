@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Department;
-use App\Models\DoctorSchedule;
 use App\Models\Employee;
 use App\Models\Polyclinic;
 use App\Models\Role;
@@ -209,38 +208,5 @@ class UserAndEmployeeSeeder extends Seeder
                 'address' => 'Jl. Retawu No. 8, Klojen, Kota Malang',
             ]
         );
-
-        // 7. Doctor Schedules (Monday through Saturday)
-        for ($day = 1; $day <= 6; $day++) {
-            // dr. Ahmad Fauzi (Poli Umum)
-            DoctorSchedule::firstOrCreate(
-                [
-                    'employee_id' => $empDokter->id,
-                    'polyclinic_id' => $polyUmum->id,
-                    'day_of_week' => $day,
-                ],
-                [
-                    'start_time' => '08:00:00',
-                    'end_time' => '13:00:00',
-                    'quota' => 40,
-                    'is_active' => true,
-                ]
-            );
-
-            // drg. Maya Anggraini (Poli Gigi)
-            DoctorSchedule::firstOrCreate(
-                [
-                    'employee_id' => $empDokterGigi->id,
-                    'polyclinic_id' => $polyGigi->id,
-                    'day_of_week' => $day,
-                ],
-                [
-                    'start_time' => '09:00:00',
-                    'end_time' => '14:00:00',
-                    'quota' => 25,
-                    'is_active' => true,
-                ]
-            );
-        }
     }
 }
