@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Visit;
 use App\Services\NursingAssessmentService;
-use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -15,19 +14,17 @@ class NursingAssessmentController extends Controller
 
     public function index(Request $request): View
     {
-        $today = Carbon::today();
-
         $waitingList = Visit::with(['patient.allergies', 'polyclinic', 'doctor'])
-            ->whereDate('registration_date', $today)
             ->whereIn('status', ['menunggu_pemeriksaan_awal', 'terdaftar', 'pemeriksaan_awal_berlangsung'])
-            ->orderBy('registration_date', 'asc')
-            ->get();
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate($this->perPage($request), ['*'], 'waiting_page');
 
         $completedList = Visit::with(['patient', 'polyclinic', 'nursingAssessment.nurse'])
-            ->whereDate('registration_date', $today)
             ->whereHas('nursingAssessment')
-            ->orderBy('updated_at', 'desc')
-            ->get();
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate($this->perPage($request), ['*'], 'completed_page');
 
         return view('nursing.index', compact('waitingList', 'completedList'));
     }
