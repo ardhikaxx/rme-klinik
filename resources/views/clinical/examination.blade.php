@@ -1,9 +1,15 @@
 @extends('layouts.app')
 
 @section('title', 'Pemeriksaan Klinis - ' . $visit->patient->name)
+@section('page_title', 'Pemeriksaan Dokter (SOAP)')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('clinical.index') }}">Pemeriksaan Dokter</a></li>
+    <li class="breadcrumb-item active" aria-current="page">SOAP {{ $visit->visit_number }}</li>
+@endsection
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid p-0">
     <!-- Top Action & Navigation Bar -->
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
         <div>
