@@ -109,6 +109,55 @@ test('dokter can access clinical examination but is forbidden from clinic settin
         ->assertStatus(403);
 });
 
+test('sidebar displays only authorized menus matching user permissions', function () {
+    // Admisi does not see nursing, exam, odontogram, or kia in sidebar
+    $this->actingAs($this->userAdmisi);
+    $sidebarAdmisi = view('layouts.sidebar')->render();
+    expect($sidebarAdmisi)->not->toContain('Pengkajian Awal')
+        ->and($sidebarAdmisi)->not->toContain('Pemeriksaan Dokter')
+        ->and($sidebarAdmisi)->not->toContain('Odontogram')
+        ->and($sidebarAdmisi)->not->toContain('Poli KIA & Balita');
+
+    // Attach nursing.assessment to perawat
+    $permNursing = Permission::firstOrCreate(['name' => 'nursing.assessment'], ['display_name' => 'Pengkajian', 'group' => 'Keperawatan']);
+    $permKia = Permission::firstOrCreate(['name' => 'kia.manage'], ['display_name' => 'KIA', 'group' => 'Poli']);
+    $this->rolePerawat->permissions()->sync([$permNursing->id, $permKia->id]);
+
+    $userPerawat = User::create([
+        'name' => 'Siti Perawat',
+        'username' => 'perawat_test',
+        'email' => 'perawat_test@klinik.id',
+        'password' => Hash::make('password123'),
+        'is_active' => true,
+    ]);
+    $userPerawat->roles()->attach($this->rolePerawat->id);
+
+    $this->actingAs($userPerawat);
+    $sidebarPerawat = view('layouts.sidebar')->render();
+    expect($sidebarPerawat)->toContain('Pengkajian Awal')
+        ->and($sidebarPerawat)->toContain('Poli KIA & Balita')
+        ->and($sidebarPerawat)->not->toContain('Pemeriksaan Dokter');
+
+    // Kepala klinik with supervisory permissions has access and sees menus
+    $this->roleKepala->permissions()->sync([$permNursing->id, $permKia->id]);
+    $userKepala = User::create([
+        'name' => 'dr. Hendro Kepala',
+        'username' => 'kepala_test',
+        'email' => 'kepala_test@klinik.id',
+        'password' => Hash::make('password123'),
+        'is_active' => true,
+    ]);
+    $userKepala->roles()->attach($this->roleKepala->id);
+
+    $this->actingAs($userKepala);
+    $sidebarKepala = view('layouts.sidebar')->render();
+    expect($sidebarKepala)->toContain('Pengkajian Awal')
+        ->and($sidebarKepala)->toContain('Poli KIA & Balita');
+
+    $this->get(route('nursing.index'))->assertOk();
+    $this->get(route('kia.index'))->assertOk();
+});
+
 test('unauthenticated request to protected route is redirected to login', function () {
     $this->get(route('dashboard'))
         ->assertRedirect(route('login'));
