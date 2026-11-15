@@ -19,7 +19,8 @@ class LaboratoryController extends Controller
         $status = $request->query('status');
 
         $query = LaboratoryRequest::with(['visit.patient', 'doctor', 'items.laboratory'])
-            ->orderBy('request_time', 'desc');
+            ->orderBy('request_time', 'desc')
+            ->orderBy('id', 'desc');
 
         if ($status) {
             $query->where('status', $status);
