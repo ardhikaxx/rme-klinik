@@ -21,5 +21,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useBootstrapFive();
+
+        /*
+         * Every paginated table renders through the shared number-only view,
+         * so no default "previous / next" controls can ever leak into the UI.
+         */
+        Paginator::defaultView('pagination.numbers');
     }
 }
