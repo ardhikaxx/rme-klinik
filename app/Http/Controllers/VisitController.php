@@ -7,7 +7,6 @@ use App\Models\Patient;
 use App\Models\Polyclinic;
 use App\Models\Visit;
 use App\Services\VisitService;
-use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -19,9 +18,6 @@ class VisitController extends Controller
     public function index(Request $request): View
     {
         $filters = $request->only(['date', 'polyclinic_id', 'doctor_id', 'status', 'payment_type', 'search']);
-        if (empty($filters['date'])) {
-            $filters['date'] = Carbon::today()->toDateString();
-        }
 
         $visits = $this->visitService->getVisits($filters, $this->perPage($request));
         $polyclinics = Polyclinic::where('is_active', true)->get();
