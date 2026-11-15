@@ -22,7 +22,8 @@ class ReportController extends Controller
         $topDiseases = $this->reportService->getTopDiseases($startDate, $endDate, 10);
         $topMedicines = $this->reportService->getTopMedicines($startDate, $endDate, 10);
         $dailyTrend = $this->reportService->getDailyTrend($startDate, $endDate);
-        $medicalFees = $this->reportService->getMedicalFees($startDate, $endDate);
+        $medicalFees = $this->reportService->medicalFeesQuery($startDate, $endDate)
+            ->paginate($this->perPage($request));
 
         return view('reports.index', compact(
             'summary', 'visitsByPoly', 'topDiseases', 'topMedicines', 'dailyTrend', 'medicalFees', 'startDate', 'endDate'
