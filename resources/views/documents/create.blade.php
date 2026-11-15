@@ -1,23 +1,22 @@
 @extends('layouts.app')
 
 @section('title', 'Penerbitan Dokumen Medis - ' . $visit->patient->name)
+@section('page_title', 'Penerbitan Dokumen Medis Resmi')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('documents.index') }}">Dokumen Medis</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('clinical.examination', $visit->id) }}">Pemeriksaan</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Terbitkan Surat Baru</li>
+@endsection
+
+@section('page_actions')
+    <a href="{{ route('clinical.examination', $visit->id) }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Kembali ke Pemeriksaan
+    </a>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Penerbitan Dokumen Medis Resmi</h4>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('clinical.examination', $visit->id) }}">Pemeriksaan</a></li>
-                    <li class="breadcrumb-item active">Buat Dokumen Medis</li>
-                </ol>
-            </nav>
-        </div>
-        <a href="{{ route('clinical.examination', $visit->id) }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Kembali ke Pemeriksaan
-        </a>
+<div class="container-fluid p-0">
     </div>
 
     <!-- Patient Header Card -->
