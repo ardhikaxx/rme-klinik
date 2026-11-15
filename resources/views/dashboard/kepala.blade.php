@@ -107,7 +107,7 @@
 {{-- Charts & Analytics Row --}}
 <div class="row g-4 mb-4">
     <div class="col-12 col-lg-8">
-        <div class="card-healthcare h-100 d-flex flex-column">
+        <div class="card-healthcare h-100">
             <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <span class="d-flex align-items-center gap-2">
                     <i class="fa-solid fa-chart-column text-primary"></i> Tren Kunjungan Pasien 7 Hari Terakhir
@@ -126,7 +126,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-body d-flex flex-column flex-grow-1 p-3">
+            <div class="card-body p-3">
                 {{-- Quick Metrics Summary Row --}}
                 <div class="row g-2 mb-3">
                     <div class="col-4">
@@ -149,25 +149,25 @@
                     </div>
                 </div>
 
-                {{-- Chart Canvas Container (Takes 100% of remaining vertical card space) --}}
-                <div class="position-relative flex-grow-1 w-100" style="min-height: 280px;">
+                {{-- Chart Canvas Container with Stable Fixed Height (Prevents Uncontrolled Height Expansion) --}}
+                <div class="position-relative w-100" style="height: 285px; max-height: 285px;">
                     <canvas id="visitsTrendChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-12 col-lg-4">
-        <div class="card-healthcare h-100 d-flex flex-column">
+        <div class="card-healthcare h-100">
             <div class="card-header">
                 <span class="d-flex align-items-center gap-2">
                     <i class="fa-solid fa-chart-pie text-info"></i> Distribusi Kunjungan per Poli
                 </span>
             </div>
-            <div class="card-body d-flex flex-column flex-grow-1">
-                <div class="position-relative" style="height: 220px;">
+            <div class="card-body">
+                <div class="position-relative" style="height: 200px; max-height: 200px;">
                     <canvas id="polyDistributionChart"></canvas>
                 </div>
-                <div class="mt-3 flex-grow-1">
+                <div class="mt-3">
                     @forelse($visitsByPoly as $poly)
                         <div class="d-flex justify-content-between align-items-center small py-1 border-bottom">
                             <span><i class="fa-solid fa-circle-dot text-primary me-2"></i>{{ $poly->name }}</span>
@@ -239,20 +239,18 @@
             const datesLabels = {!! json_encode($dates) !!};
             const visitsData = {!! json_encode($trendVisits) !!};
 
-            // Dynamic Gradients
-            function getBarGradient(ctx, chartArea) {
-                if (!chartArea) return '#2EACF0';
-                const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            // Stable Linear Gradients
+            function getBarGradient(ctx) {
+                const gradient = ctx.createLinearGradient(0, 0, 0, 260);
                 gradient.addColorStop(0, '#2EACF0');
                 gradient.addColorStop(1, '#0083C9');
                 return gradient;
             }
 
-            function getLineFillGradient(ctx, chartArea) {
-                if (!chartArea) return 'rgba(46, 172, 240, 0.2)';
-                const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                gradient.addColorStop(0, 'rgba(46, 172, 240, 0.45)');
-                gradient.addColorStop(0.65, 'rgba(46, 172, 240, 0.12)');
+            function getLineFillGradient(ctx) {
+                const gradient = ctx.createLinearGradient(0, 0, 0, 260);
+                gradient.addColorStop(0, 'rgba(46, 172, 240, 0.40)');
+                gradient.addColorStop(0.65, 'rgba(46, 172, 240, 0.10)');
                 gradient.addColorStop(1, 'rgba(46, 172, 240, 0.00)');
                 return gradient;
             }
@@ -269,12 +267,12 @@
                         const val = data.datasets[0].data[index];
                         if (val > 0) {
                             ctx.save();
-                            ctx.font = '600 11px system-ui, -apple-system, sans-serif';
+                            ctx.font = '700 12px system-ui, -apple-system, sans-serif';
                             ctx.fillStyle = '#0083C9';
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'bottom';
-                            const yPos = chart.config.type === 'line' ? element.y - 8 : element.y - 4;
-                            ctx.fillText(val + ' Pasien', element.x, yPos);
+                            const yPos = chart.config.type === 'line' ? element.y - 7 : element.y - 4;
+                            ctx.fillText(val, element.x, yPos);
                             ctx.restore();
                         }
                     });
@@ -290,21 +288,20 @@
                         data: visitsData,
                         backgroundColor: function(context) {
                             const chart = context.chart;
-                            const { ctx, chartArea } = chart;
                             return chart.config.type === 'line' 
-                                ? getLineFillGradient(ctx, chartArea) 
-                                : getBarGradient(ctx, chartArea);
+                                ? getLineFillGradient(chart.ctx) 
+                                : getBarGradient(chart.ctx);
                         },
                         borderColor: '#0083C9',
-                        borderWidth: 2,
-                        borderRadius: { topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0 },
+                        borderWidth: 1.5,
+                        borderRadius: { topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0 },
                         borderSkipped: false,
-                        maxBarThickness: 50,
+                        maxBarThickness: 46,
                         // Line chart styling
                         fill: true,
                         tension: 0.35,
                         pointRadius: 5,
-                        pointHoverRadius: 8,
+                        pointHoverRadius: 7,
                         pointBackgroundColor: '#ffffff',
                         pointBorderColor: '#0083C9',
                         pointBorderWidth: 2.5
@@ -315,10 +312,10 @@
                     maintainAspectRatio: false,
                     layout: {
                         padding: {
-                            top: 24,
-                            bottom: 6,
-                            left: 4,
-                            right: 4
+                            top: 20,
+                            bottom: 4,
+                            left: 2,
+                            right: 2
                         }
                     },
                     plugins: {
@@ -347,10 +344,10 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grace: '18%',
+                            suggestedMax: Math.max(...visitsData, 4) + 1,
                             grid: {
-                                color: 'rgba(226, 232, 240, 0.7)',
-                                borderDash: [4, 4],
+                                color: 'rgba(226, 232, 240, 0.75)',
+                                borderDash: [3, 3],
                                 drawBorder: false
                             },
                             ticks: {
@@ -389,7 +386,7 @@
                     btnBar.classList.add('active');
                     btnLine.classList.remove('active');
                     trendChart.config.type = 'bar';
-                    trendChart.data.datasets[0].borderWidth = 2;
+                    trendChart.data.datasets[0].borderWidth = 1.5;
                     trendChart.update();
                 });
 
