@@ -1,19 +1,21 @@
 @extends('layouts.app')
 
-@section('title', 'Daftar Pasien Menunggu Pemeriksaan Dokter')
+@section('title', 'Ruang Pemeriksaan Dokter (Klinis)')
+@section('page_title', 'Ruang Pemeriksaan Dokter (Klinis)')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item active" aria-current="page">Pemeriksaan Dokter</li>
+@endsection
+
+@section('page_actions')
+    <div class="text-muted small">
+        <i class="fas fa-user-md me-1 text-primary"></i> Dokter: <strong>{{ auth()->user()->employee?->formatted_name ?? auth()->user()->name }}</strong> | 
+        <i class="fas fa-calendar-day ms-2 me-1 text-primary"></i> {{ \Carbon\Carbon::today()->translatedFormat('l, d F Y') }}
+    </div>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Ruang Pemeriksaan Dokter (Klinis)</h4>
-            <p class="text-muted small mb-0">Daftar antrean pasien yang telah melewati pengkajian awal dan siap diperiksa</p>
-        </div>
-        <div class="text-muted small">
-            <i class="fas fa-user-md me-1 text-primary"></i> Dokter: <strong>{{ auth()->user()->employee?->formatted_name ?? auth()->user()->name }}</strong> | 
-            <i class="fas fa-calendar-day ms-2 me-1 text-primary"></i> {{ \Carbon\Carbon::today()->translatedFormat('l, d F Y') }}
-        </div>
-    </div>
+<div class="container-fluid p-0">
 
     <!-- Waiting Queue -->
     <div class="card border-0 shadow-sm mb-4">
