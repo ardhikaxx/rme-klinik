@@ -87,7 +87,7 @@
                     <tbody>
                         @forelse($logs as $log)
                             <tr>
-                                <td>
+                                <td class="text-nowrap">
                                     <div class="fw-bold">{{ $log->created_at->format('d/m/Y') }}</div>
                                     <small class="text-muted">{{ $log->created_at->format('H:i:s') }} WIB</small>
                                 </td>
@@ -131,11 +131,9 @@
                 </table>
             </div>
         </div>
-        @if($logs->hasPages())
-            <div class="card-footer bg-white border-top py-3">
-                {{ $logs->withQueryString()->links() }}
-            </div>
-        @endif
+        <div class="card-footer bg-white border-top py-3">
+            <x-table-footer :paginator="$logs" label="catatan audit" />
+        </div>
     </div>
 </div>
 @endsection
