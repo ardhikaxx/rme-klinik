@@ -25,7 +25,7 @@ class LaboratoryController extends Controller
             $query->where('status', $status);
         }
 
-        $requests = $query->paginate(15);
+        $requests = $query->paginate($this->perPage($request));
         $testsMaster = Laboratory::where('is_active', true)->get();
 
         return view('laboratory.index', compact('requests', 'testsMaster', 'status'));
