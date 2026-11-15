@@ -72,6 +72,17 @@ class User extends Authenticatable
         return false;
     }
 
+    public function hasAnyPermission(array $permissions): bool
+    {
+        foreach ($permissions as $perm) {
+            if ($this->hasPermission($perm)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function getPrimaryRoleNameAttribute(): string
     {
         $firstRole = $this->roles->first();
