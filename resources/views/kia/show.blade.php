@@ -1,9 +1,15 @@
 @extends('layouts.app')
 
 @section('title', 'Pemeriksaan Poli KIA - ' . $visit->patient->name)
+@section('page_title', 'Pelayanan Kesehatan Ibu dan Anak (Poli KIA)')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('kia.index') }}">Poli KIA</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Layanan {{ $visit->visit_number }}</li>
+@endsection
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid p-0">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>
             <div class="d-flex align-items-center gap-2">
