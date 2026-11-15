@@ -1,18 +1,20 @@
 @extends('layouts.app')
 
 @section('title', 'Daftar Pengkajian Awal Keperawatan')
+@section('page_title', 'Pengkajian Awal & Tanda Vital')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item active" aria-current="page">Pengkajian Keperawatan</li>
+@endsection
+
+@section('page_actions')
+    <div class="text-muted small">
+        <i class="fas fa-calendar-day me-1 text-primary"></i> {{ \Carbon\Carbon::today()->translatedFormat('l, d F Y') }}
+    </div>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Pengkajian Awal & Tanda Vital Pasien</h4>
-            <p class="text-muted small mb-0">Daftar antrean pasien hari ini yang memerlukan triase dan pengkajian awal perawat</p>
-        </div>
-        <div class="text-muted small">
-            <i class="fas fa-calendar-day me-1 text-primary"></i> {{ \Carbon\Carbon::today()->translatedFormat('l, d F Y') }}
-        </div>
-    </div>
+<div class="container-fluid p-0">
 
     <!-- Waiting List Card -->
     <div class="card border-0 shadow-sm mb-4">
