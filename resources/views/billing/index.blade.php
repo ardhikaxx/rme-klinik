@@ -1,18 +1,20 @@
 @extends('layouts.app')
 
 @section('title', 'Billing & Kasir Klinik')
+@section('page_title', 'Kasir & Billing Pembayaran Terpadu')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item active" aria-current="page">Kasir & Billing</li>
+@endsection
+
+@section('page_actions')
+    <div class="text-muted small">
+        <i class="fas fa-cash-register me-1 text-primary"></i> Kasir Aktif: <strong>{{ auth()->user()->name }}</strong>
+    </div>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Kasir & Billing Pembayaran Terpadu</h4>
-            <p class="text-muted small mb-0">Pengelolaan tagihan pasien, pembayaran multi-metode, diskon, refund, dan cetak kuitansi</p>
-        </div>
-        <div class="text-muted small">
-            <i class="fas fa-cash-register me-1 text-primary"></i> Kasir Aktif: <strong>{{ auth()->user()->name }}</strong>
-        </div>
-    </div>
+<div class="container-fluid p-0">
 
     <!-- Filter Status Tabs -->
     <div class="card border-0 shadow-sm mb-4">
