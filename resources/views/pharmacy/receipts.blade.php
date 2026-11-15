@@ -1,18 +1,21 @@
 @extends('layouts.app')
 
 @section('title', 'Penerimaan Barang Farmasi (Goods Receipt)')
+@section('page_title', 'Penerimaan Barang Farmasi (Goods Receipt)')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('pharmacy.prescriptions') }}">Farmasi</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Penerimaan Obat</li>
+@endsection
+
+@section('page_actions')
+    <button type="button" class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addReceiptModal">
+        <i class="fas fa-truck-loading me-1"></i> Catat Penerimaan Barang Baru
+    </button>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Penerimaan Barang Farmasi (Goods Receipt)</h4>
-            <p class="text-muted small mb-0">Pencatatan faktur supplier, nomor batch, tanggal kedaluwarsa, dan penambahan stok sistem</p>
-        </div>
-        <button type="button" class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addReceiptModal">
-            <i class="fas fa-truck-loading me-1"></i> Catat Penerimaan Barang Baru
-        </button>
-    </div>
+<div class="container-fluid p-0">
 
     <!-- Receipts Table -->
     <div class="card border-0 shadow-sm">
