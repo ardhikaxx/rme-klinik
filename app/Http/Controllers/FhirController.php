@@ -22,6 +22,7 @@ class FhirController extends Controller
     {
         $mappings = FhirMapping::with('syncLogs')
             ->orderBy('updated_at', 'desc')
+            ->orderBy('id', 'desc')
             ->paginate($this->perPage($request));
 
         $patientsCount = Patient::count();
