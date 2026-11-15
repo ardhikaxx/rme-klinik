@@ -1,9 +1,15 @@
 @extends('layouts.app')
 
 @section('title', 'Detail Resep & Dispensing - ' . $prescription->prescription_number)
+@section('page_title', 'Telaah Resep & Dispensing Obat')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('pharmacy.prescriptions') }}">Farmasi</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Telaah {{ $prescription->prescription_number }}</li>
+@endsection
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid p-0">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>
             <div class="d-flex align-items-center gap-2">
