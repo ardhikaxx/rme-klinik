@@ -64,6 +64,8 @@ class ValidateDataset extends Command
             ['Kategori' => 'Farmasi & Stok', 'Tabel' => 'medicine_stock_movements', 'Deskripsi' => 'Kartu Mutasi Stok Obat (Audit FEFO)', 'Target Min' => '100.000'],
             ['Kategori' => 'Farmasi & Resep', 'Tabel' => 'prescriptions', 'Deskripsi' => 'Resep Elektronik Dokter', 'Target Min' => '80.000'],
             ['Kategori' => 'Farmasi & Resep', 'Tabel' => 'prescription_items', 'Deskripsi' => 'Item Obat pada Resep', 'Target Min' => '120.000'],
+            ['Kategori' => 'Farmasi & Resep', 'Tabel' => 'prescription_compounds', 'Deskripsi' => 'Obat Racikan / Puyer Resep', 'Target Min' => '5.000'],
+            ['Kategori' => 'Farmasi & Resep', 'Tabel' => 'prescription_compound_items', 'Deskripsi' => 'Komponen Bahan Obat Racikan', 'Target Min' => '10.000'],
             ['Kategori' => 'Farmasi & Resep', 'Tabel' => 'dispensing_transactions', 'Deskripsi' => 'Transaksi Penyerahan Obat Kasir/Apotek', 'Target Min' => '60.000'],
             ['Kategori' => 'Farmasi & Resep', 'Tabel' => 'dispensing_items', 'Deskripsi' => 'Rincian Penyerahan Obat & Batch', 'Target Min' => '80.000'],
 
@@ -76,10 +78,12 @@ class ValidateDataset extends Command
             ['Kategori' => 'Billing & Kasir', 'Tabel' => 'billing_invoices', 'Deskripsi' => 'Faktur / Tagihan Pelayanan Pasien', 'Target Min' => '80.000'],
             ['Kategori' => 'Billing & Kasir', 'Tabel' => 'billing_items', 'Deskripsi' => 'Rincian Item Tagihan Pasien', 'Target Min' => '200.000'],
             ['Kategori' => 'Billing & Kasir', 'Tabel' => 'payments', 'Deskripsi' => 'Kwitansi Pembayaran Kasir', 'Target Min' => '70.000'],
+            ['Kategori' => 'Billing & Kasir', 'Tabel' => 'refunds', 'Deskripsi' => 'Pengembalian Dana / Retur Klaim', 'Target Min' => '50'],
             ['Kategori' => 'Jasa Medis', 'Tabel' => 'medical_fee_transactions', 'Deskripsi' => 'Distribusi Jasa Medis Dokter & Perawat', 'Target Min' => '80.000'],
 
             // Dokumen Medis & Integrasi
             ['Kategori' => 'Dokumen & Regulasi', 'Tabel' => 'medical_documents', 'Deskripsi' => 'Surat Sakit, Sehat & Rujukan', 'Target Min' => '10.000'],
+            ['Kategori' => 'Dokumen & Regulasi', 'Tabel' => 'patient_documents', 'Deskripsi' => 'Berkas Penunjang & Identitas Pasien', 'Target Min' => '5.000'],
             ['Kategori' => 'Audit & Integrasi', 'Tabel' => 'audit_logs', 'Deskripsi' => 'Audit Trail Log Aktivitas Sistem', 'Target Min' => '50.000'],
             ['Kategori' => 'Audit & Integrasi', 'Tabel' => 'fhir_mappings', 'Deskripsi' => 'Pemetaan Sumber Daya Interoperabilitas FHIR', 'Target Min' => '50.000'],
         ];
