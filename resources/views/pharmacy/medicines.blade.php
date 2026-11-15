@@ -82,8 +82,8 @@
                                     <div class="fw-bold text-dark">Jual: Rp{{ number_format($med->selling_price, 0, ',', '.') }}</div>
                                 </td>
                                 <td class="text-center">
-                                    <span class="fs-6 fw-bold {{ $isLow ? 'text-danger' : 'text-dark' }}">{{ $totalStock }}</span>
-                                    <small class="text-muted d-block">(Min: {{ $med->min_stock }})</small>
+                                    <span class="fs-6 fw-bold {{ $isLow ? 'text-danger' : 'text-dark' }}">{{ number_format($totalStock, 0, ',', '.') }}</span>
+                                    <small class="text-muted d-block">(Min: {{ number_format($med->min_stock, 0, ',', '.') }})</small>
                                 </td>
                                 <td>
                                     @if($totalStock == 0)

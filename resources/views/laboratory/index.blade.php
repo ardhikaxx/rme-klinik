@@ -88,7 +88,10 @@
                                         @endforeach
                                     </ul>
                                 </td>
-                                <td><small class="text-muted">{{ $req->clinical_notes ?? '-' }}</small></td>
+                                <td>
+                                    <small class="text-muted d-inline-block text-truncate" style="max-width: 210px;"
+                                        title="{{ $req->clinical_notes ?? '-' }}">{{ $req->clinical_notes ?? '-' }}</small>
+                                </td>
                                 <td>
                                     <span class="badge {{ $req->status_badge_class }}">{{ $req->status_label }}</span>
                                 </td>
