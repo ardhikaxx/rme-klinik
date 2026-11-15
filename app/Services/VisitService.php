@@ -19,7 +19,7 @@ class VisitService
     /**
      * Get paginated visits with internal filters.
      */
-    public function getVisits(array $filters = [], int $perPage = 15): LengthAwarePaginator
+    public function getVisits(array $filters = [], int $perPage = 50): LengthAwarePaginator
     {
         $query = Visit::query()
             ->with(['patient.allergies', 'polyclinic', 'doctor', 'registeredByUser', 'billingInvoice']);
