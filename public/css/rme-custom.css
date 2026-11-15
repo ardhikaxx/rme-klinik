@@ -22,6 +22,14 @@
     --radius-sm: 8px;
     --radius-md: 10px;
     --radius-lg: 14px;
+
+    /* Table & pagination design tokens */
+    --rme-border-soft: #e5eaf0;
+    --rme-surface-subtle: #f7f9fb;
+    --rme-table-header-bg: #f4f7f9;
+    --rme-row-hover: #f7f9fb;
+    --rme-control-height: 36px;
+    --rme-page-btn-size: 36px;
 }
 
 body {
@@ -376,7 +384,46 @@ body.sidebar-collapsed #page-content-wrapper {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
 }
 
-/* Cards & Components */
+/* Cards & Components ------------------------------------------------------ */
+/* Normalise the plain Bootstrap card so every list page shares the same
+   container as the healthcare card without page specific overrides. */
+.card {
+    background-color: var(--rme-card-bg);
+    border: 1px solid var(--rme-border-soft) !important;
+    border-radius: var(--radius-md) !important;
+}
+
+.card-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--rme-border-soft);
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 1.15rem;
+}
+
+/* Form controls used by every table filter bar */
+.form-control,
+.form-select {
+    border-color: var(--rme-border-soft);
+    border-radius: var(--radius-sm);
+    color: var(--rme-text-main);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--rme-soft);
+    box-shadow: 0 0 0 3px rgba(46, 172, 240, 0.14);
+}
+
+.input-group-text {
+    border-color: var(--rme-border-soft);
+    border-radius: var(--radius-sm);
+    background-color: #ffffff;
+    color: var(--rme-text-muted);
+}
+
 .card-healthcare {
     background-color: var(--rme-card-bg);
     border: 1px solid var(--rme-border);
@@ -523,36 +570,507 @@ body.sidebar-collapsed #page-content-wrapper {
     gap: 0.65rem;
 }
 
-/* Tables Styling */
+/* ==========================================================================
+   TABLE DESIGN SYSTEM
+   Shared by every table in the application (list pages, detail panels,
+   dashboards and modals). Rules are scoped to the Bootstrap ".table"
+   contract so any table that follows the markup convention inherits the
+   exact same look without page specific CSS.
+   ========================================================================== */
+.table,
 .table-healthcare {
+    --bs-table-border-color: var(--rme-border-soft);
+    --bs-table-striped-bg: transparent;
+
+    width: 100%;
+    margin-bottom: 0;
+    color: var(--rme-text-main);
+    font-size: 0.875rem;
     border-collapse: separate;
     border-spacing: 0;
+}
+
+/* Cells: comfortable padding, thin separators, predictable wrapping */
+.table > :not(caption) > * > *,
+.table-healthcare > :not(caption) > * > * {
+    padding: 0.575rem 1rem;
+    background-color: transparent;
+    border-top: none;
+    border-bottom: 1px solid var(--rme-border-soft);
+    box-shadow: none;
+    vertical-align: middle;
+    line-height: 1.45;
+    color: var(--rme-text-main);
+    overflow-wrap: break-word;
+}
+
+/* Header: soft surface, consistent type, proportional weight */
+.table > thead > tr > *,
+.table-healthcare > thead > tr > * {
+    background-color: var(--rme-table-header-bg);
+    color: var(--rme-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.7rem 1rem;
+    border-top: none;
+    border-bottom: 1px solid #dbe3ea;
+    white-space: normal;
+    vertical-align: middle;
+}
+
+/* Row hover: very light surface so the pointed row is easy to track */
+.table > tbody > tr:hover > *,
+.table-healthcare > tbody > tr:hover > * {
+    background-color: var(--rme-row-hover);
+}
+
+/* First / last cell follows the card radius */
+.table > thead > tr > *:first-child,
+.table-healthcare > thead > tr > *:first-child {
+    border-top-left-radius: var(--radius-md);
+}
+
+.table > thead > tr > *:last-child,
+.table-healthcare > thead > tr > *:last-child {
+    border-top-right-radius: var(--radius-md);
+}
+
+.table > tbody > tr:last-child > *:first-child,
+.table-healthcare > tbody > tr:last-child > *:first-child {
+    border-bottom-left-radius: var(--radius-md);
+}
+
+.table > tbody > tr:last-child > *:last-child,
+.table-healthcare > tbody > tr:last-child > *:last-child {
+    border-bottom-right-radius: var(--radius-md);
+}
+
+/* Compact tables keep the same language with a tighter rhythm */
+.table-sm > :not(caption) > * > * {
+    padding: 0.4rem 0.75rem;
+}
+
+.table-sm > thead > tr > * {
+    padding: 0.5rem 0.75rem;
+}
+
+/* Money, quantity and other figures line up on the right */
+.table td.text-end,
+.table th.text-end,
+.table td.text-end .fw-bold,
+.table-healthcare td.text-end {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Bordered variants used on detail and receipt panels */
+.table-bordered > :not(caption) > * > * {
+    border-color: var(--rme-border-soft);
+}
+
+/* Minimal, contextual status badges inside tables */
+.table .badge {
+    border-radius: 6px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+.table .badge.bg-primary { background-color: #e6f2fa !important; color: #0083c9 !important; }
+.table .badge.bg-success { background-color: #e9f7ef !important; color: #198754 !important; }
+.table .badge.bg-danger { background-color: #fdecec !important; color: #c82333 !important; }
+.table .badge.bg-warning { background-color: #fff6e0 !important; color: #9a6b00 !important; }
+.table .badge.bg-info { background-color: #e4f4fd !important; color: #0083c9 !important; }
+.table .badge.bg-secondary { background-color: #edf1f4 !important; color: #547f96 !important; }
+.table .badge.bg-light { background-color: #f4f7f9 !important; color: #547f96 !important; }
+
+.table .badge.bg-light.border,
+.table .badge.border {
+    border: 1px solid var(--rme-border-soft) !important;
+}
+
+/* Horizontal scrolling stays inside its container on every breakpoint */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+}
+
+@media (max-width: 767.98px) {
+    .table > :not(caption) > * > *,
+    .table-healthcare > :not(caption) > * > * {
+        padding: 0.5rem 0.7rem;
+        font-size: 0.8125rem;
+    }
+
+    .table > thead > tr > *,
+    .table-healthcare > thead > tr > * {
+        padding: 0.55rem 0.7rem;
+        font-size: 0.72rem;
+    }
+}
+
+/* ==========================================================================
+   TABLE FOOTER — data summary, rows-per-page selector, number pagination
+   Rendered by the <x-table-footer> component at the bottom of every list card.
+   ========================================================================== */
+.table-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.85rem 1.5rem;
     width: 100%;
 }
 
-.table-healthcare thead th {
-    background-color: #eef3f6;
-    color: var(--rme-primary);
+.table-footer__info {
+    font-size: 0.8125rem;
+    color: var(--rme-text-muted);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.table-footer__info strong {
+    color: var(--rme-text-main);
     font-weight: 600;
-    font-size: 0.85rem;
-    border-top: none;
-    border-bottom: 1px solid var(--rme-border);
-    padding: 0.75rem 1rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.table-footer__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem 1.25rem;
+    margin-left: auto;
+}
+
+.table-footer__per-page {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.table-footer__label {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--rme-text-muted);
     white-space: nowrap;
 }
 
-.table-healthcare tbody td {
-    padding: 0.75rem 1rem;
-    vertical-align: middle;
-    border-bottom: 1px solid var(--rme-border);
-    font-size: 0.9rem;
+.table-footer__select {
+    min-width: 84px;
+    max-width: 104px;
+    height: var(--rme-control-height);
+    padding-block: 0;
+    padding-left: 0.65rem;
+    border-color: var(--rme-border-soft);
+    border-radius: var(--radius-sm);
+    background-color: #ffffff;
+    color: var(--rme-text-main);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.table-healthcare tbody tr:hover {
-    background-color: #f8fafc;
+.table-footer__select:hover {
+    border-color: var(--rme-soft);
 }
 
-/* Responsive adjustments */
+.table-footer__select:focus {
+    border-color: var(--rme-soft);
+    box-shadow: 0 0 0 3px rgba(46, 172, 240, 0.14);
+}
+
+/* ==========================================================================
+   PAGINATION — NUMBER ONLY
+   No previous / next / first / last control, no arrow, no chevron.
+   Only page numbers, a visual ellipsis, and an obvious active state.
+   Shared by the Laravel paginator (pagination/numbers.blade.php) and by the
+   DataTables Bootstrap integration so both render the identical control.
+   ========================================================================== */
+.rme-pagination,
+.dataTables_wrapper .dataTables_paginate {
+    display: flex;
+    align-items: center;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.rme-pagination .pagination,
+.dataTables_wrapper .dataTables_paginate .pagination {
+    --bs-pagination-padding-x: 0.5rem;
+    --bs-pagination-padding-y: 0.375rem;
+    --bs-pagination-margin: 0;
+    --bs-pagination-color: var(--rme-text-muted);
+    --bs-pagination-bg: #ffffff;
+    --bs-pagination-border-width: 1px;
+    --bs-pagination-border-color: var(--rme-border-soft);
+    --bs-pagination-border-radius: var(--radius-sm);
+    --bs-pagination-hover-color: var(--rme-primary);
+    --bs-pagination-hover-bg: var(--rme-surface-subtle);
+    --bs-pagination-hover-border-color: var(--rme-soft);
+    --bs-pagination-focus-color: var(--rme-primary);
+    --bs-pagination-focus-bg: var(--rme-surface-subtle);
+    --bs-pagination-focus-border-color: var(--rme-soft);
+    --bs-pagination-focus-box-shadow: none;
+    --bs-pagination-active-color: #ffffff;
+    --bs-pagination-active-bg: var(--rme-info);
+    --bs-pagination-active-border-color: var(--rme-info);
+    --bs-pagination-disabled-color: var(--rme-soft);
+    --bs-pagination-disabled-bg: #ffffff;
+    --bs-pagination-disabled-border-color: var(--rme-border-soft);
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-radius: 0;
+}
+
+.rme-pagination .page-item,
+.dataTables_wrapper .dataTables_paginate .page-item {
+    margin: 0;
+}
+
+.rme-pagination .page-link,
+.dataTables_wrapper .dataTables_paginate .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--rme-page-btn-size);
+    height: var(--rme-page-btn-size);
+    padding: 0 0.55rem;
+    border: 1px solid var(--rme-border-soft);
+    border-radius: var(--radius-sm);
+    background-color: #ffffff;
+    box-shadow: none;
+    color: var(--rme-text-muted);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1;
+    text-decoration: none;
+    font-variant-numeric: tabular-nums;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.rme-pagination a.page-link:hover,
+.dataTables_wrapper .dataTables_paginate a.page-link:hover {
+    background-color: var(--rme-surface-subtle);
+    border-color: var(--rme-soft);
+    color: var(--rme-primary);
+}
+
+.rme-pagination .page-item.active .page-link,
+.dataTables_wrapper .dataTables_paginate .page-item.active .page-link,
+.rme-pagination .page-item.active .page-link:hover,
+.dataTables_wrapper .dataTables_paginate .page-item.active .page-link:hover,
+.rme-pagination .page-item.current .page-link,
+.dataTables_wrapper .dataTables_paginate .page-item.current .page-link,
+.rme-pagination .page-item.current .page-link:hover,
+.dataTables_wrapper .dataTables_paginate .page-item.current .page-link:hover {
+    background-color: var(--rme-info);
+    border-color: var(--rme-info);
+    color: #ffffff;
+    font-weight: 600;
+    pointer-events: none;
+}
+
+/* The ellipsis is purely visual — never clickable, never an arrow. */
+.rme-pagination .page-item.disabled .page-link,
+.dataTables_wrapper .dataTables_paginate .page-item.disabled .page-link,
+.rme-pagination .page-item.disabled .page-link:hover,
+.dataTables_wrapper .dataTables_paginate .page-item.disabled .page-link:hover {
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--rme-soft);
+    cursor: default;
+    pointer-events: none;
+    padding-inline: 0.35rem;
+    letter-spacing: 0.08em;
+    box-shadow: none;
+}
+
+.rme-dt-ellipsis,
+.dataTables_wrapper .dataTables_paginate .rme-dt-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: var(--rme-page-btn-size);
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--rme-soft);
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    list-style: none;
+    cursor: default;
+    user-select: none;
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   DATATABLES — numbers-only paging, app design language
+   ========================================================================== */
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_paginate {
+    font-size: 0.8125rem;
+    color: var(--rme-text-muted);
+}
+
+.dataTables_wrapper .row:first-child > div {
+    padding: 0.85rem 1rem 0.35rem;
+}
+
+.dataTables_wrapper .row:last-child > div {
+    padding: 0.5rem 1rem 0.85rem;
+}
+
+.dataTables_wrapper .dataTables_length {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+}
+
+.dataTables_wrapper .dataTables_length select {
+    min-width: 128px;
+    height: var(--rme-control-height);
+    padding-block: 0;
+    --bs-form-select-padding-end: 1.9rem;
+    border: 1px solid var(--rme-border-soft);
+    border-radius: var(--radius-sm);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--rme-text-main);
+    background-color: #ffffff;
+    cursor: pointer;
+}
+
+.dataTables_wrapper .dataTables_filter {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.dataTables_wrapper .dataTables_filter label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    font-weight: 500;
+    color: var(--rme-text-muted);
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    width: auto;
+    min-width: 210px;
+    height: var(--rme-control-height);
+    padding: 0 2rem 0 0.75rem;
+    border: 1px solid var(--rme-border-soft);
+    border-radius: var(--radius-sm);
+    background-color: #ffffff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%236c7e88'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.65rem center;
+    background-size: 14px 14px;
+    font-size: 0.8125rem;
+    color: var(--rme-text-main);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dataTables_wrapper .dataTables_filter input:focus {
+    border-color: var(--rme-soft);
+    box-shadow: 0 0 0 3px rgba(46, 172, 240, 0.14);
+    outline: none;
+}
+
+.dataTables_wrapper .dataTables_info {
+    padding-top: 0.35rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+    padding-top: 0.6rem;
+    text-align: left;
+    word-break: keep-all;
+}
+
+@media (max-width: 767.98px) {
+    .table-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .table-footer__controls {
+        flex-direction: column;
+        align-items: stretch;
+        margin-left: 0;
+        gap: 0.65rem;
+    }
+
+    .table-footer__per-page {
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .table-footer__select {
+        max-width: 110px;
+        width: auto;
+        flex: 0 1 auto;
+    }
+
+    .rme-pagination .page-link,
+    .dataTables_wrapper .dataTables_paginate .page-link,
+    .rme-pagination .page-item.disabled .page-link {
+        min-width: 32px;
+        height: 32px;
+        padding: 0 0.4rem;
+        font-size: 0.75rem;
+        border-radius: 8px;
+    }
+
+    .rme-pagination .pagination,
+    .dataTables_wrapper .dataTables_paginate .pagination {
+        gap: 4px;
+    }
+
+    .dataTables_wrapper .row:first-child > div,
+    .dataTables_wrapper .row:last-child > div {
+        padding: 0.6rem 0.75rem;
+    }
+
+    .dataTables_wrapper .dataTables_filter {
+        justify-content: flex-start;
+        white-space: normal;
+    }
+
+    .dataTables_wrapper .dataTables_filter label {
+        flex-wrap: wrap;
+    }
+
+    .dataTables_wrapper .dataTables_filter input {
+        min-width: 100%;
+    }
+
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        padding-top: 0.35rem;
+    }
+}
 @media (max-width: 991.98px) {
     #sidebar-wrapper {
         top: 12px;
