@@ -1,18 +1,20 @@
 @extends('layouts.app')
 
 @section('title', 'Daftar Dokumen & Surat Medis Pasien')
+@section('page_title', 'Dokumen Medis & Surat Keterangan Pasien')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item active" aria-current="page">Dokumen Medis</li>
+@endsection
+
+@section('page_actions')
+    <div class="text-muted small">
+        <i class="fas fa-file-medical me-1 text-primary"></i> Generator Dokumen Resmi Klinik
+    </div>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Dokumen Medis & Surat Keterangan Pasien</h4>
-            <p class="text-muted small mb-0">Arsip surat sakit, surat keterangan sehat, surat rujukan faskes, dan informed consent</p>
-        </div>
-        <div class="text-muted small">
-            <i class="fas fa-file-medical me-1 text-primary"></i> Generator Dokumen Resmi Klinik
-        </div>
-    </div>
+<div class="container-fluid p-0">
 
     <!-- Filter Type Tabs -->
     <div class="card border-0 shadow-sm mb-4">
