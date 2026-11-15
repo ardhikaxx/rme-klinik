@@ -239,7 +239,7 @@
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0 datatable-responsive">
+                <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
                             <th>Waktu Pelayanan</th>
@@ -254,7 +254,7 @@
                     <tbody>
                         @forelse($medicalFees as $mf)
                             <tr>
-                                <td>{{ $mf->created_at->format('d/m/Y H:i') }}</td>
+                                <td class="text-nowrap">{{ $mf->created_at->format('d/m/Y H:i') }}</td>
                                 <td>
                                     <div class="fw-bold">{{ $mf->visit?->patient?->name }}</div>
                                     <small class="text-muted">{{ $mf->visit?->visit_number }}</small>
@@ -273,6 +273,9 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+        <div class="card-footer bg-white border-top py-3">
+            <x-table-footer :paginator="$medicalFees" label="transaksi jasa medis" />
         </div>
     </div>
 </div>
