@@ -20,8 +20,8 @@
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
             <h5 class="card-title mb-0 fw-bold text-primary">
-                <i class="fas fa-female me-2"></i>Antrean Pasien Poli KIA Hari Ini
-                <span class="badge bg-primary ms-2">{{ $visits->count() }} Pasien</span>
+                <i class="fas fa-female me-2"></i>Daftar Pelayanan Pasien KIA & KB
+                <span class="badge bg-primary ms-2">{{ $visits->total() }} Pasien</span>
             </h5>
         </div>
         <div class="card-body p-0">
@@ -81,6 +81,9 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+        <div class="card-footer bg-white border-top py-3">
+            <x-table-footer :paginator="$visits" label="pasien poli kia" />
         </div>
     </div>
 </div>
