@@ -78,7 +78,7 @@
                                     <div class="fw-bold text-primary">{{ $inv->invoice_number }}</div>
                                     <small class="badge bg-light text-dark border">Kunjungan: {{ $inv->visit?->visit_number }}</small>
                                 </td>
-                                <td>
+                                <td class="text-nowrap">
                                     <div>{{ $inv->created_at->format('d/m/Y') }}</div>
                                     <small class="text-muted">{{ $inv->created_at->format('H:i') }} WIB</small>
                                 </td>
@@ -117,11 +117,9 @@
                 </table>
             </div>
         </div>
-        @if($invoices->hasPages())
-            <div class="card-footer bg-white border-top py-3">
-                {{ $invoices->links() }}
-            </div>
-        @endif
+        <div class="card-footer bg-white border-top py-3">
+            <x-table-footer :paginator="$invoices" label="tagihan" />
+        </div>
     </div>
 </div>
 @endsection
