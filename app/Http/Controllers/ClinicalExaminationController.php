@@ -8,7 +8,6 @@ use App\Models\MedicalRecord;
 use App\Models\ServiceTariff;
 use App\Models\Visit;
 use App\Services\MedicalRecordService;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,22 +19,21 @@ class ClinicalExaminationController extends Controller
 
     public function index(Request $request): View
     {
-        $today = Carbon::today();
         $doctorEmpId = auth()->user()->employee?->id;
 
         $waitingList = Visit::with(['patient.allergies', 'polyclinic', 'nursingAssessment'])
-            ->whereDate('registration_date', $today)
             ->when($doctorEmpId, fn ($q) => $q->where('doctor_id', $doctorEmpId))
             ->whereIn('status', ['menunggu_dokter', 'pemeriksaan_dokter_berlangsung'])
-            ->orderBy('registration_date', 'asc')
-            ->get();
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate($this->perPage($request), ['*'], 'waiting_page');
 
         $completedList = Visit::with(['patient', 'polyclinic', 'medicalRecord.diagnoses'])
-            ->whereDate('registration_date', $today)
             ->when($doctorEmpId, fn ($q) => $q->where('doctor_id', $doctorEmpId))
             ->whereHas('medicalRecord')
-            ->orderBy('updated_at', 'desc')
-            ->get();
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate($this->perPage($request), ['*'], 'completed_page');
 
         return view('clinical.index', compact('waitingList', 'completedList'));
     }
