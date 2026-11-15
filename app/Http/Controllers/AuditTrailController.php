@@ -16,7 +16,9 @@ class AuditTrailController extends Controller
         $startDate = $request->query('start_date');
         $endDate = $request->query('end_date');
 
-        $query = AuditLog::with('user')->orderBy('created_at', 'desc');
+        $query = AuditLog::with('user')
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc');
 
         if ($userId) {
             $query->where('user_id', $userId);
