@@ -1,8 +1,12 @@
 <?php
 
+use App\Models\Department;
+use App\Models\Employee;
 use App\Models\Patient;
+use App\Models\Polyclinic;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\Visit;
 use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -211,4 +215,83 @@ test('a page beyond the range still shows a valid active page number', function 
 
     expect($html)->toContain('aria-current="page">3<')
         ->and($html)->not->toContain('&hellip;');
+});
+
+test('all tables show all historical data and place newest records on page 1 row 1', function () {
+    // 1. Patient table ordering
+    $olderPatient = Patient::create([
+        'medical_record_number' => 'RM-2020-000001',
+        'nik' => '3201230000000001',
+        'name' => 'Pasien Lama 2020',
+        'gender' => 'L',
+        'date_of_birth' => '1980-01-01',
+        'phone' => '081111111111',
+        'address' => 'Jl. Lama',
+        'created_at' => now()->subYears(2),
+    ]);
+
+    $newestPatient = Patient::create([
+        'medical_record_number' => 'RM-2026-999999',
+        'nik' => '3201239999999999',
+        'name' => 'Pasien Baru Terbaru',
+        'gender' => 'P',
+        'date_of_birth' => '1995-05-05',
+        'phone' => '082222222222',
+        'address' => 'Jl. Baru',
+        'created_at' => now(),
+    ]);
+
+    $respPatients = $this->actingAs($this->user)->get(route('patients.index'))->assertOk();
+    $patients = $respPatients->viewData('patients');
+    expect($patients->total())->toBeGreaterThanOrEqual(2)
+        ->and($patients->first()->id)->toBe($newestPatient->id);
+
+    // 2. Visit table shows all dates and places newest visit at page 1 row 1
+    $dept = Department::create(['code' => 'DEP-MED-PAG', 'name' => 'Medis']);
+    $poly = Polyclinic::create(['code' => 'POL-UMU-PAG', 'name' => 'Poli Umum', 'is_active' => true]);
+    $docUser = User::create([
+        'name' => 'dr. Dokter Test',
+        'username' => 'drtest',
+        'email' => 'drtest@klinik.test',
+        'password' => Hash::make('password'),
+        'is_active' => true,
+    ]);
+    $doc = Employee::create([
+        'user_id' => $docUser->id,
+        'department_id' => $dept->id,
+        'employee_number' => 'DOC-PAG-01',
+        'name' => 'dr. Dokter Test',
+        'gender' => 'L',
+        'profession' => 'dokter',
+        'is_active' => true,
+    ]);
+
+    $olderVisit = Visit::create([
+        'visit_number' => 'REG-20200101-0001',
+        'patient_id' => $olderPatient->id,
+        'polyclinic_id' => $poly->id,
+        'doctor_id' => $doc->id,
+        'registered_by' => $this->user->id,
+        'registration_date' => now()->subYears(2),
+        'visit_type' => 'lama',
+        'status' => 'selesai',
+        'created_at' => now()->subYears(2),
+    ]);
+
+    $newestVisit = Visit::create([
+        'visit_number' => 'REG-20261116-9999',
+        'patient_id' => $newestPatient->id,
+        'polyclinic_id' => $poly->id,
+        'doctor_id' => $doc->id,
+        'registered_by' => $this->user->id,
+        'registration_date' => now(),
+        'visit_type' => 'baru',
+        'status' => 'menunggu_dokter',
+        'created_at' => now(),
+    ]);
+
+    $respVisits = $this->actingAs($this->user)->get(route('visits.index'))->assertOk();
+    $visits = $respVisits->viewData('visits');
+    expect($visits->total())->toBeGreaterThanOrEqual(2)
+        ->and($visits->first()->id)->toBe($newestVisit->id);
 });
