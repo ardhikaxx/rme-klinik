@@ -84,11 +84,9 @@
                 </table>
             </div>
         </div>
-        @if($users->hasPages())
-            <div class="card-footer bg-white border-top py-3">
-                {{ $users->links() }}
-            </div>
-        @endif
+        <div class="card-footer bg-white border-top py-3">
+            <x-table-footer :paginator="$users" label="akun pengguna" />
+        </div>
     </div>
 </div>
 
