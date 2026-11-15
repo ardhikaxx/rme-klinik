@@ -1,26 +1,28 @@
 @extends('layouts.app')
 
 @section('title', 'Laporan Manajemen & Analisis Eksekutif Klinik')
+@section('page_title', 'Laporan Manajemen & Analisis Operasional')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item active" aria-current="page">Laporan & Analitik</li>
+@endsection
+
+@section('page_actions')
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{{ route('reports.export', ['type' => 'visits', 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="btn btn-outline-success btn-sm">
+            <i class="fas fa-file-csv me-1"></i> Export Kunjungan
+        </a>
+        <a href="{{ route('reports.export', ['type' => 'diseases', 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-file-csv me-1"></i> Export ICD-10
+        </a>
+        <a href="{{ route('reports.export', ['type' => 'fees', 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="btn btn-outline-warning text-dark btn-sm">
+            <i class="fas fa-file-csv me-1"></i> Export Jasa Medis
+        </a>
+    </div>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Laporan Manajemen & Analisis Operasional</h4>
-            <p class="text-muted small mb-0">Tren kunjungan, 10 besar penyakit ICD-10, konsumsi farmasi, dan pembagian jasa medis</p>
-        </div>
-        <div class="d-flex flex-wrap gap-2">
-            <a href="{{ route('reports.export', ['type' => 'visits', 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="btn btn-outline-success">
-                <i class="fas fa-file-csv me-1"></i> Export Kunjungan (CSV)
-            </a>
-            <a href="{{ route('reports.export', ['type' => 'diseases', 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="btn btn-outline-primary">
-                <i class="fas fa-file-csv me-1"></i> Export ICD-10 (CSV)
-            </a>
-            <a href="{{ route('reports.export', ['type' => 'fees', 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="btn btn-outline-warning text-dark">
-                <i class="fas fa-file-csv me-1"></i> Export Jasa Medis (CSV)
-            </a>
-        </div>
-    </div>
+<div class="container-fluid p-0">
 
     <!-- Date Filter Card -->
     <div class="card border-0 shadow-sm mb-4">
