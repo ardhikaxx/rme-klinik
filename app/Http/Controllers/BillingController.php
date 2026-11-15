@@ -20,7 +20,8 @@ class BillingController extends Controller
         $date = $request->query('date');
 
         $query = BillingInvoice::with(['patient', 'visit.polyclinic', 'payments'])
-            ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc');
 
         if ($status) {
             $query->where('status', $status);
