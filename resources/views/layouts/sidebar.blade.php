@@ -23,26 +23,30 @@
         </ul>
 
         {{-- PASIEN & KUNJUNGAN --}}
-        @if(auth()->user()->hasAnyRole(['admisi_kasir', 'kepala_klinik', 'dokter', 'perawat_bidan']))
+        @if(auth()->user()->hasAnyPermission(['patients.view', 'visits.view']))
             <div class="sidebar-heading">Administrasi Pasien</div>
             <ul class="nav flex-column mb-3">
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('patients.*') ? 'active' : '' }}" href="{{ route('patients.index') }}">
-                        <i class="fa-solid fa-user-injured"></i>
-                        <span>Data Pasien (MPI)</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('visits.*') ? 'active' : '' }}" href="{{ route('visits.index') }}">
-                        <i class="fa-solid fa-calendar-check"></i>
-                        <span>Daftar Kunjungan</span>
-                    </a>
-                </li>
+                @if(auth()->user()->hasPermission('patients.view'))
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('patients.*') ? 'active' : '' }}" href="{{ route('patients.index') }}">
+                            <i class="fa-solid fa-user-injured"></i>
+                            <span>Data Pasien (MPI)</span>
+                        </a>
+                    </li>
+                @endif
+                @if(auth()->user()->hasPermission('visits.view'))
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('visits.*') ? 'active' : '' }}" href="{{ route('visits.index') }}">
+                            <i class="fa-solid fa-calendar-check"></i>
+                            <span>Daftar Kunjungan</span>
+                        </a>
+                    </li>
+                @endif
             </ul>
         @endif
 
         {{-- KEPERAWATAN --}}
-        @if(auth()->user()->hasAnyRole(['perawat_bidan', 'kepala_klinik']))
+        @if(auth()->user()->hasPermission('nursing.assessment'))
             <div class="sidebar-heading">Pelayanan Keperawatan</div>
             <ul class="nav flex-column mb-3">
                 <li class="nav-item">
@@ -55,53 +59,65 @@
         @endif
 
         {{-- DOKTER & REKAM MEDIS --}}
-        @if(auth()->user()->hasAnyRole(['dokter', 'kepala_klinik']))
+        @if(auth()->user()->hasAnyPermission(['medical_records.view', 'medical_records.create', 'odontogram.manage', 'kia.manage']) || auth()->user()->hasAnyRole(['dokter', 'kepala_klinik']))
             <div class="sidebar-heading">Pelayanan Medis (RME)</div>
             <ul class="nav flex-column mb-3">
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('clinical.index', 'clinical.examination') ? 'active' : '' }}" href="{{ route('clinical.index') }}">
-                        <i class="fa-solid fa-stethoscope"></i>
-                        <span>Pemeriksaan Dokter</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('odontogram.*') ? 'active' : '' }}" href="{{ route('odontogram.index') }}">
-                        <i class="fa-solid fa-tooth"></i>
-                        <span>Odontogram (Poli Gigi)</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('kia.*') ? 'active' : '' }}" href="{{ route('kia.index') }}">
-                        <i class="fa-solid fa-baby"></i>
-                        <span>Poli KIA & Balita</span>
-                    </a>
-                </li>
+                @if(auth()->user()->hasAnyPermission(['medical_records.view', 'medical_records.create']) || auth()->user()->hasAnyRole(['dokter', 'kepala_klinik']))
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('clinical.index', 'clinical.examination') ? 'active' : '' }}" href="{{ route('clinical.index') }}">
+                            <i class="fa-solid fa-stethoscope"></i>
+                            <span>Pemeriksaan Dokter</span>
+                        </a>
+                    </li>
+                @endif
+                @if(auth()->user()->hasPermission('odontogram.manage') || auth()->user()->hasAnyRole(['dokter', 'kepala_klinik']))
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('odontogram.*') ? 'active' : '' }}" href="{{ route('odontogram.index') }}">
+                            <i class="fa-solid fa-tooth"></i>
+                            <span>Odontogram (Poli Gigi)</span>
+                        </a>
+                    </li>
+                @endif
+                @if(auth()->user()->hasPermission('kia.manage'))
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('kia.*') ? 'active' : '' }}" href="{{ route('kia.index') }}">
+                            <i class="fa-solid fa-baby"></i>
+                            <span>Poli KIA & Balita</span>
+                        </a>
+                    </li>
+                @endif
             </ul>
         @endif
 
         {{-- FARMASI --}}
-        @if(auth()->user()->hasAnyRole(['farmasi', 'kepala_klinik', 'dokter']))
+        @if(auth()->user()->hasAnyPermission(['prescriptions.create', 'prescriptions.verify', 'pharmacy.dispense', 'pharmacy.stock.view', 'pharmacy.stock.manage', 'pharmacy.opname']))
             <div class="sidebar-heading">Instalasi Farmasi</div>
             <ul class="nav flex-column mb-3">
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('pharmacy.prescriptions*') ? 'active' : '' }}" href="{{ route('pharmacy.prescriptions') }}">
-                        <i class="fa-solid fa-prescription"></i>
-                        <span>Resep Elektronik</span>
-                    </a>
-                </li>
-                @if(auth()->user()->hasAnyRole(['farmasi', 'kepala_klinik']))
+                @if(auth()->user()->hasAnyPermission(['prescriptions.create', 'prescriptions.verify', 'pharmacy.dispense']))
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('pharmacy.prescriptions*') ? 'active' : '' }}" href="{{ route('pharmacy.prescriptions') }}">
+                            <i class="fa-solid fa-prescription"></i>
+                            <span>Resep Elektronik</span>
+                        </a>
+                    </li>
+                @endif
+                @if(auth()->user()->hasPermission('pharmacy.stock.view'))
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('pharmacy.medicines*') ? 'active' : '' }}" href="{{ route('pharmacy.medicines') }}">
                             <i class="fa-solid fa-pills"></i>
                             <span>Master Obat & Stok</span>
                         </a>
                     </li>
+                @endif
+                @if(auth()->user()->hasPermission('pharmacy.stock.manage'))
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('pharmacy.receipts*') ? 'active' : '' }}" href="{{ route('pharmacy.receipts') }}">
                             <i class="fa-solid fa-truck-ramp-box"></i>
                             <span>Penerimaan Obat</span>
                         </a>
                     </li>
+                @endif
+                @if(auth()->user()->hasPermission('pharmacy.opname'))
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('pharmacy.opnames*') ? 'active' : '' }}" href="{{ route('pharmacy.opnames') }}">
                             <i class="fa-solid fa-clipboard-check"></i>
@@ -113,7 +129,7 @@
         @endif
 
         {{-- LABORATORIUM --}}
-        @if(auth()->user()->hasAnyRole(['dokter', 'perawat_bidan', 'kepala_klinik', 'admisi_kasir']))
+        @if(auth()->user()->hasAnyPermission(['laboratory.order', 'laboratory.record', 'laboratory.verify']) || auth()->user()->hasRole('kepala_klinik'))
             <div class="sidebar-heading">Laboratorium</div>
             <ul class="nav flex-column mb-3">
                 <li class="nav-item">
@@ -126,7 +142,7 @@
         @endif
 
         {{-- BILLING & KASIR --}}
-        @if(auth()->user()->hasAnyRole(['admisi_kasir', 'kepala_klinik']))
+        @if(auth()->user()->hasPermission('billing.view'))
             <div class="sidebar-heading">Billing & Kasir</div>
             <ul class="nav flex-column mb-3">
                 <li class="nav-item">
@@ -139,7 +155,7 @@
         @endif
 
         {{-- SURAT & DOKUMEN --}}
-        @if(auth()->user()->hasAnyRole(['dokter', 'admisi_kasir', 'kepala_klinik']))
+        @if(auth()->user()->hasAnyPermission(['documents.generate', 'documents.upload']) || auth()->user()->hasRole('kepala_klinik'))
             <div class="sidebar-heading">Dokumen Medis</div>
             <ul class="nav flex-column mb-3">
                 <li class="nav-item">
@@ -152,7 +168,7 @@
         @endif
 
         {{-- LAPORAN --}}
-        @if(auth()->user()->hasAnyRole(['kepala_klinik', 'admisi_kasir', 'dokter', 'farmasi']))
+        @if(auth()->user()->hasAnyPermission(['reports.financial', 'reports.clinical', 'reports.operational']) || auth()->user()->hasRole('kepala_klinik'))
             <div class="sidebar-heading">Laporan & Analitik</div>
             <ul class="nav flex-column mb-3">
                 <li class="nav-item">
