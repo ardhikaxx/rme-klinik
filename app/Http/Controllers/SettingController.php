@@ -22,7 +22,10 @@ class SettingController extends Controller
      */
     public function tariffs(Request $request): View
     {
-        $tariffs = ServiceTariff::with('polyclinic')->paginate($this->perPage($request));
+        $tariffs = ServiceTariff::with('polyclinic')
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate($this->perPage($request));
         $polyclinics = Polyclinic::where('is_active', true)->get();
 
         return view('settings.tariffs', compact('tariffs', 'polyclinics'));
@@ -77,8 +80,8 @@ class SettingController extends Controller
     public function schedules(Request $request): View
     {
         $schedules = DoctorSchedule::with(['employee', 'polyclinic'])
-            ->orderBy('day_of_week')
-            ->orderBy('start_time')
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
             ->paginate($this->perPage($request));
 
         $doctors = Employee::where('profession', 'dokter')->where('is_active', true)->get();
@@ -118,7 +121,10 @@ class SettingController extends Controller
      */
     public function users(Request $request): View
     {
-        $users = User::with(['roles', 'employee'])->paginate($this->perPage($request));
+        $users = User::with(['roles', 'employee'])
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate($this->perPage($request));
         $roles = Role::all();
         $departments = Department::where('is_active', true)->get();
 
