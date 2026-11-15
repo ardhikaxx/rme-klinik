@@ -847,6 +847,9 @@ body.sidebar-collapsed #page-content-wrapper {
     padding: 0.2rem 0.45rem;
     line-height: 1.25;
     border-radius: 4px;
+    /* Auto table layout can shrink a column to the button's min-content,
+       which wraps the label into a tall stack and inflates the row height. */
+    white-space: nowrap;
 }
 
 .table .btn-group-sm > .btn,
