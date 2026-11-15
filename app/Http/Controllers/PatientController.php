@@ -16,7 +16,7 @@ class PatientController extends Controller
     public function index(Request $request): View
     {
         $filters = $request->only(['search', 'gender', 'is_verified']);
-        $patients = $this->patientService->getPatients($filters, 15);
+        $patients = $this->patientService->getPatients($filters, $this->perPage($request));
 
         return view('patients.index', compact('patients', 'filters'));
     }
