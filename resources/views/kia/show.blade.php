@@ -325,21 +325,9 @@ $(document).ready(function() {
     // Chart.js Growth Chart
     var ctx = document.getElementById('growthChart');
     if (ctx) {
-        var labels = [
-            @foreach($historicalGrowths as $h)
-                "{{ $h->age_months }} bln",
-            @endforeach
-        ];
-        var weights = [
-            @foreach($historicalGrowths as $h)
-                {{ $h->weight }},
-            @endforeach
-        ];
-        var heights = [
-            @foreach($historicalGrowths as $h)
-                {{ $h->height }},
-            @endforeach
-        ];
+        var labels = @json($historicalGrowths->map(fn($h) => $h->age_months . ' bln'));
+        var weights = @json($historicalGrowths->pluck('weight'));
+        var heights = @json($historicalGrowths->pluck('height'));
 
         new Chart(ctx, {
             type: 'line',
