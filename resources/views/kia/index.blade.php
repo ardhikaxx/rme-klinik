@@ -1,19 +1,21 @@
 @extends('layouts.app')
 
-@section('title', 'Daftar Kunjungan Poli KIA (Kesehatan Ibu & Anak)')
+@section('title', 'Poli Kesehatan Ibu dan Anak (KIA)')
+@section('page_title', 'Poli Kesehatan Ibu dan Anak (KIA)')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item active" aria-current="page">Pelayanan KIA & KB</li>
+@endsection
+
+@section('page_actions')
+    <div class="text-muted small">
+        <i class="fas fa-baby me-1 text-primary"></i> Poliklinik: <strong>{{ $polyKia?->name ?? 'Poli KIA' }}</strong> | 
+        <i class="fas fa-calendar-day ms-2 me-1 text-primary"></i> {{ \Carbon\Carbon::today()->translatedFormat('l, d F Y') }}
+    </div>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Poli Kesehatan Ibu dan Anak (KIA)</h4>
-            <p class="text-muted small mb-0">Pelayanan antenatal care (ANC) ibu hamil, imunisasi, dan pemantauan tumbuh kembang anak</p>
-        </div>
-        <div class="text-muted small">
-            <i class="fas fa-baby me-1 text-primary"></i> Poliklinik: <strong>{{ $polyKia?->name ?? 'Poli KIA' }}</strong> | 
-            <i class="fas fa-calendar-day ms-2 me-1 text-primary"></i> {{ \Carbon\Carbon::today()->translatedFormat('l, d F Y') }}
-        </div>
-    </div>
+<div class="container-fluid p-0">
 
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
