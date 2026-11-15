@@ -1,18 +1,20 @@
 @extends('layouts.app')
 
 @section('title', 'Master Tarif Layanan & Jasa Medis')
+@section('page_title', 'Master Tarif Layanan & Jasa Medis')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item active" aria-current="page">Tarif Layanan & Jasa Medis</li>
+@endsection
+
+@section('page_actions')
+    <button type="button" class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addTariffModal">
+        <i class="fas fa-plus me-1"></i> Tambah Tarif Baru
+    </button>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Master Tarif Layanan & Pembagian Jasa Medis</h4>
-            <p class="text-muted small mb-0">Pengaturan tarif tindakan klinis, konsultasi dokter, administrasi, dan pembagian porsi dokter/perawat/klinik</p>
-        </div>
-        <button type="button" class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addTariffModal">
-            <i class="fas fa-plus me-1"></i> Tambah Tarif Baru
-        </button>
-    </div>
+<div class="container-fluid p-0">
 
     <!-- Tariffs Table -->
     <div class="card border-0 shadow-sm">
