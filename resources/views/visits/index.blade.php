@@ -101,7 +101,7 @@
                                 </a>
                                 <small class="text-muted d-block">{{ ucfirst($v->visit_type) }}</small>
                             </td>
-                            <td>{{ $v->registration_date->format('H:i') }} WIB</td>
+                            <td class="text-nowrap">{{ $v->registration_date->format('H:i') }} WIB</td>
                             <td>
                                 <a href="{{ route('patients.show', $v->patient->id) }}" class="fw-semibold text-decoration-none" style="color: var(--rme-info);">
                                     {{ $v->patient->name }}
@@ -136,10 +136,8 @@
             </table>
         </div>
     </div>
-    @if($visits->hasPages())
-        <div class="card-footer bg-white border-top py-3">
-            {{ $visits->withQueryString()->links() }}
-        </div>
-    @endif
+    <div class="card-footer bg-white border-top py-3">
+        <x-table-footer :paginator="$visits" label="kunjungan" />
+    </div>
 </div>
 @endsection
