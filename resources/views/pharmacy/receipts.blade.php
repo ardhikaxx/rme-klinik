@@ -47,7 +47,7 @@
                                     <div class="fw-bold text-dark">{{ $rc->supplier?->name }}</div>
                                     <small class="text-muted">{{ $rc->supplier?->phone }}</small>
                                 </td>
-                                <td>{{ $rc->received_date->format('d/m/Y') }}</td>
+                                <td class="text-nowrap">{{ $rc->received_date->format('d/m/Y') }}</td>
                                 <td>
                                     <ul class="mb-0 ps-3 small text-muted">
                                         @foreach($rc->items as $it)
@@ -77,11 +77,9 @@
                 </table>
             </div>
         </div>
-        @if($receipts->hasPages())
-            <div class="card-footer bg-white border-top py-3">
-                {{ $receipts->links() }}
-            </div>
-        @endif
+        <div class="card-footer bg-white border-top py-3">
+            <x-table-footer :paginator="$receipts" label="penerimaan obat" />
+        </div>
     </div>
 </div>
 
