@@ -7,7 +7,6 @@ use App\Models\AuditLog;
 use App\Models\ChildGrowth;
 use App\Models\Polyclinic;
 use App\Models\Visit;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,16 +14,15 @@ use Illuminate\View\View;
 
 class MaternalChildController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $today = Carbon::today();
         $polyKia = Polyclinic::where('type', 'kia')->first();
 
         $visits = Visit::with(['patient', 'antenatalCare', 'childGrowth'])
-            ->whereDate('registration_date', $today)
-            ->where('polyclinic_id', $polyKia?->id)
-            ->orderBy('registration_date', 'asc')
-            ->get();
+            ->when($polyKia, fn ($q) => $q->where('polyclinic_id', $polyKia->id))
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate($this->perPage($request));
 
         return view('kia.index', compact('visits', 'polyKia'));
     }
