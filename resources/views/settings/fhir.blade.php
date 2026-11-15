@@ -1,18 +1,20 @@
 @extends('layouts.app')
 
 @section('title', 'Kesiapan Interoperabilitas SATUSEHAT / HL7 FHIR R4')
+@section('page_title', 'Interoperabilitas SATUSEHAT (HL7 FHIR R4)')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item active" aria-current="page">SATUSEHAT / FHIR</li>
+@endsection
+
+@section('page_actions')
+    <span class="badge bg-success fs-6 px-3 py-2">
+        <i class="fas fa-shield-halved me-1"></i> HL7 FHIR R4 Ready
+    </span>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Kesiapan Interoperabilitas SATUSEHAT (HL7 FHIR R4)</h4>
-            <p class="text-muted small mb-0">Pemetaan standar HL7 FHIR R4 Kementerian Kesehatan RI (Permenkes 24/2022) untuk data rekam medis terintegrasi</p>
-        </div>
-        <span class="badge bg-success fs-6 px-3 py-2">
-            <i class="fas fa-shield-halved me-1"></i> HL7 FHIR R4 Ready
-        </span>
-    </div>
+<div class="container-fluid p-0">
 
     <!-- SATUSEHAT Overview Alert -->
     <div class="alert alert-primary border-0 shadow-sm d-flex align-items-center mb-4 p-3" role="alert">
