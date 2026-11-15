@@ -34,7 +34,7 @@ class AuditTrailController extends Controller
             $query->whereDate('created_at', '<=', $endDate);
         }
 
-        $logs = $query->paginate(25);
+        $logs = $query->paginate($this->perPage($request));
         $users = User::all();
         $modules = AuditLog::select('module')->distinct()->pluck('module');
 
