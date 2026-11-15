@@ -12,14 +12,14 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            // 1. Fondasi Keamanan & Aksesibilitas Role
+            // 1. Fondasi Keamanan & Aksesibilitas Role & Permission
             RoleAndPermissionSeeder::class,
 
-            // 2. Tenaga Medis & Akun Pengguna Inti
-            UserAndEmployeeSeeder::class,
-
-            // 3. Master Klinik, Poliklinik, Tarif, Obat Dasar & Pembayaran
+            // 2. Master Klinik, Departemen, Poliklinik, Tarif, Obat Dasar & Pembayaran
             ClinicMasterSeeder::class,
+
+            // 3. Tenaga Medis, Karyawan & Akun Pengguna Inti (membutuhkan Departemen & Poliklinik)
+            UserAndEmployeeSeeder::class,
 
             // 4. Katalog Diagnosis ICD-10 & ICD-9-CM
             IcdCodesSeeder::class,
