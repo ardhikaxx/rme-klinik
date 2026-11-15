@@ -51,6 +51,9 @@ class ReportService
             ->whereBetween('expiry_date', [Carbon::today(), Carbon::today()->addDays(90)])
             ->count();
 
+        $totalDoctorFees = MedicalFeeTransaction::whereBetween('created_at', [$start, $end])
+            ->sum('doctor_fee');
+
         return [
             'total_visits' => $totalVisits,
             'new_patients' => $newPatients,
@@ -60,6 +63,7 @@ class ReportService
             'pending_billing' => (float) $pendingBilling,
             'low_stock_medicines' => $lowStockMedicines,
             'near_expiry_batches' => $nearExpiryBatches,
+            'total_doctor_fees' => (float) $totalDoctorFees,
         ];
     }
 
