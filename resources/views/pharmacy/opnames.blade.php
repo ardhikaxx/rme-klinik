@@ -1,18 +1,21 @@
 @extends('layouts.app')
 
 @section('title', 'Stock Opname Farmasi & Penyesuaian Stok')
+@section('page_title', 'Stock Opname & Penyesuaian Fisik Farmasi')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('pharmacy.prescriptions') }}">Farmasi</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Stock Opname</li>
+@endsection
+
+@section('page_actions')
+    <button type="button" class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addOpnameModal">
+        <i class="fas fa-clipboard-check me-1"></i> Buat Stock Opname Baru
+    </button>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-        <div>
-            <h4 class="mb-1 text-dark fw-bold">Stock Opname & Penyesuaian Fisik Farmasi</h4>
-            <p class="text-muted small mb-0">Pencocokan stok fisik obat dengan saldo sistem, selisih stok, dan persetujuan Kepala Klinik</p>
-        </div>
-        <button type="button" class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addOpnameModal">
-            <i class="fas fa-clipboard-check me-1"></i> Buat Stock Opname Baru
-        </button>
-    </div>
+<div class="container-fluid p-0">
 
     <!-- Opnames List -->
     <div class="card border-0 shadow-sm">
