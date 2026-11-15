@@ -42,7 +42,7 @@
                                 <td>
                                     <div class="fw-bold text-primary">{{ $op->opname_number }}</div>
                                 </td>
-                                <td>{{ $op->opname_date->format('d/m/Y') }}</td>
+                                <td class="text-nowrap">{{ $op->opname_date->format('d/m/Y') }}</td>
                                 <td>
                                     <div><i class="fas fa-user-circle me-1 text-muted"></i>{{ $op->conductor?->name }}</div>
                                     @if($op->approver)
@@ -95,11 +95,9 @@
                 </table>
             </div>
         </div>
-        @if($opnames->hasPages())
-            <div class="card-footer bg-white border-top py-3">
-                {{ $opnames->links() }}
-            </div>
-        @endif
+        <div class="card-footer bg-white border-top py-3">
+            <x-table-footer :paginator="$opnames" label="stok opname" />
+        </div>
     </div>
 </div>
 
